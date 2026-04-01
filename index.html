@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diffusion Models from First Principles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Serif+Text:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        :root {
+            --bg:         #0e1117;
+            --surface:    #161b27;
+            --surface2:   #1e2638;
+            --border:     #2a3450;
+            --accent:     #5b8af0;
+            --accent2:    #a78bfa;
+            --gold:       #f0c060;
+            --green:      #4ade80;
+            --red:        #f87171;
+            --text:       #e2e8f0;
+            --muted:      #7d8fa8;
+            --heading:    #f8fafc;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.85;
+            font-size: 17px;
+            overflow-x: hidden;
+        }
+
+        /* Grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='512' height='512' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.35;
+        }
+
+        /* ─── HERO ─────────────────────────────────────────── */
+        .hero {
+            position: relative;
+            padding: 100px 40px 80px;
+            text-align: center;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: -50%;
+            background: radial-gradient(ellipse 60% 50% at 50% 30%, rgba(91,138,240,0.18) 0%, transparent 70%),
+                        radial-gradient(ellipse 40% 40% at 70% 60%, rgba(167,139,250,0.10) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .series-tag {
+            display: inline-block;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            border: 1px solid rgba(91,138,240,0.35);
+            border-radius: 100px;
+            padding: 6px 18px;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 5vw, 4rem);
+            font-weight: 900;
+            line-height: 1.12;
+            color: var(--heading);
+            max-width: 800px;
+            margin: 0 auto 24px;
+        }
+
+        h1 em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .subtitle {
+            font-family: 'DM Serif Text', serif;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: var(--muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+
+        .hero-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+        /* ─── LAYOUT ────────────────────────────────────────── */
+        .wrapper {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 64px 32px 120px;
+        }
+
+        /* ─── HEADINGS ──────────────────────────────────────── */
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.85rem;
+            font-weight: 700;
+            color: var(--heading);
+            margin: 72px 0 24px;
+            padding-top: 72px;
+            border-top: 1px solid var(--border);
+        }
+
+        h2 .section-num {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        h3 {
+            font-family: 'DM Serif Text', serif;
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: var(--heading);
+            margin: 40px 0 16px;
+        }
+
+        p { margin-bottom: 20px; }
+
+        strong { color: var(--heading); font-weight: 600; }
+
+        em { color: var(--accent2); font-style: italic; }
+
+        a { color: var(--accent); text-decoration: none; }
+
+        /* ─── LISTS ─────────────────────────────────────────── */
+        ul, ol {
+            margin: 20px 0 24px 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            position: relative;
+            padding: 12px 16px 12px 40px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            font-size: 0.96rem;
+        }
+
+        li::before {
+            content: '→';
+            position: absolute;
+            left: 14px;
+            color: var(--accent);
+            font-size: 13px;
+            top: 13px;
+        }
+
+        ol { counter-reset: list-ctr; }
+        ol li::before {
+            content: counter(list-ctr);
+            counter-increment: list-ctr;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+        }
+
+        /* ─── MATH DISPLAY ──────────────────────────────────── */
+        .math-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 10px;
+            padding: 28px 32px;
+            margin: 28px 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+
+        .math-block mjx-container {
+            font-size: 1.05em !important;
+        }
+
+        .math-caption {
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        .math-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 28px 0;
+        }
+
+        @media (max-width: 600px) { .math-grid { grid-template-columns: 1fr; } }
+
+        .math-grid .math-block { margin: 0; }
+
+        .math-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        /* ─── CALLOUTS ──────────────────────────────────────── */
+        .callout {
+            background: linear-gradient(135deg, rgba(240,192,96,0.08), rgba(240,192,96,0.04));
+            border: 1px solid rgba(240,192,96,0.3);
+            border-left: 3px solid var(--gold);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 28px 0;
+            color: #e8d5a3;
+            font-size: 0.97rem;
+        }
+
+        .callout strong { color: var(--gold); }
+
+        .note {
+            background: linear-gradient(135deg, rgba(91,138,240,0.08), rgba(91,138,240,0.04));
+            border: 1px solid rgba(91,138,240,0.25);
+            border-left: 3px solid var(--accent);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 28px 0;
+            font-size: 0.93rem;
+            color: #a8bde0;
+        }
+
+        .note strong { color: var(--accent); }
+
+        .conclusion-box {
+            background: linear-gradient(135deg, rgba(74,222,128,0.08), rgba(74,222,128,0.03));
+            border: 1px solid rgba(74,222,128,0.25);
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin: 28px 0;
+            color: #a7f3c8;
+        }
+
+        .conclusion-box strong { color: var(--green); }
+
+        /* ─── VISUALIZATIONS ────────────────────────────────── */
+        .vis {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 32px 24px;
+            margin: 40px 0;
+        }
+
+        .vis-title {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .vis svg { width: 100%; height: auto; display: block; }
+
+        /* ─── DIVIDER ────────────────────────────────────────── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 64px 0;
+            color: var(--border);
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider span {
+            font-size: 18px;
+            color: var(--muted);
+        }
+
+        /* ─── ENTRY ANIMATION ───────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero > * { animation: fadeUp 0.7s ease both; }
+        .series-tag { animation-delay: 0.05s; }
+        h1            { animation-delay: 0.15s; }
+        .subtitle     { animation-delay: 0.25s; }
+        .hero-meta    { animation-delay: 0.35s; }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════  HERO  ═══════════════════ -->
+<header class="hero">
+    <div class="series-tag">Part 1 · Langevin Sampling</div>
+    <h1>Diffusion Models<br>from <em>First Principles</em></h1>
+    <p class="subtitle">Is it just a "Drunkard's Walk" to a cat? Understanding generative AI through Langevin sampling, mathematical physics, and a very lost hiker in the desert.</p>
+    <div class="hero-meta">
+        <span>📐 Mathematical Deep-Dive</span>
+        <span>·</span>
+        <span>⏱ 18 min read</span>
+        <span>·</span>
+        <span>🧠 Generative AI</span>
+    </div>
+</header>
+
+<!-- ═══════════════════  BODY  ═══════════════════ -->
+<main class="wrapper">
+
+    <!-- INTRO -->
+    <p>If you have spent any time looking into modern AI, you have seen the standard explanation for Diffusion Models:</p>
+
+    <p><strong>The Forward Process:</strong> You take an image and slowly add Gaussian noise until it's just a cloud of static. <strong>The Reverse Process:</strong> You teach a neural network to "remove" that noise step-by-step to recover the image.</p>
+
+    <p>It sounds simple. Intuitive, even. But if you are like me, the "intuition" didn't quite click at first. It left me with a long list of <em>Whys</em>:</p>
+
+    <ul>
+        <li><strong>Why does adding noise work in the first place?</strong> If our goal is to create data, why do we start by destroying it?</li>
+        <li><strong>What exactly is "noise
