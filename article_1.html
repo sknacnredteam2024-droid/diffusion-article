@@ -8,14 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>
 MathJax = {
-  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']], tags: 'none' },
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']], tags: 'none', processEscapes: true },
   svg: { fontCache: 'global' },
   startup: { typeset: true }
 };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ─── TOKENS ───────────────────────────────────────── */
+/* ── TOKENS ─────────────────────────────────────── */
 :root{
   --ink:    #0d1117;
   --paper:  #faf7f2;
@@ -31,12 +31,36 @@ MathJax = {
   --lead:   #3d3628;
 }
 
-/* ─── RESET ────────────────────────────────────────── */
+/* ── RESET ───────────────────────────────────────── */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;font-size:17px}
-img,svg{display:block;max-width:100%}
+img{display:block;max-width:100%}
+/* Only block-display SVGs that are direct children of vis-body, not MathJax inline SVGs */
+.vis-body > svg, .vis-body svg{display:block;max-width:100%}
 
-/* ─── BASE ─────────────────────────────────────────── */
+/* ── MATHJAX INLINE FIX ──────────────────────────── */
+/* MathJax renders inline $...$ as <mjx-container> with an inner <svg>.
+   These must stay inline so they don't break mid-sentence. */
+mjx-container{
+  display:inline !important;
+  vertical-align:middle;
+}
+mjx-container svg{
+  display:inline !important;
+  vertical-align:middle;
+  overflow:visible;
+}
+/* Block display math ($$...$$) inside .math-block should still be centered */
+.math-block mjx-container{
+  display:block !important;
+  text-align:center;
+  margin:0 auto;
+}
+.math-block mjx-container svg{
+  display:inline-block !important;
+}
+
+/* ── BASE ────────────────────────────────────────── */
 body{
   font-family:'Source Serif 4',Georgia,serif;
   font-weight:400;
@@ -46,28 +70,24 @@ body{
   overflow-x:hidden;
 }
 
-/* subtle paper texture */
 body::before{
   content:'';
   position:fixed;inset:0;pointer-events:none;z-index:0;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
-  opacity:1;
 }
 
-/* ─── HEADER ───────────────────────────────────────── */
+/* ── MASTHEAD ────────────────────────────────────── */
 .masthead{
   position:relative;
   border-bottom:2px solid var(--ink);
   padding:56px 0 0;
   overflow:hidden;
 }
-
 .masthead-inner{
-  max-width:740px;
+  max-width:760px;
   margin:0 auto;
   padding:0 32px;
 }
-
 .series-flag{
   display:inline-flex;align-items:center;gap:10px;
   font-family:'JetBrains Mono',monospace;
@@ -77,7 +97,6 @@ body::before{
   margin-bottom:32px;
   animation:fadeDown .6s ease both;
 }
-
 .masthead h1{
   font-family:'Fraunces',serif;
   font-weight:900;font-style:italic;
@@ -88,23 +107,17 @@ body::before{
   margin-bottom:24px;
   animation:fadeDown .6s .1s ease both;
 }
-
-.masthead h1 span{
-  color:var(--amber);
-  font-style:normal;
-}
-
+.masthead h1 span{color:var(--amber);font-style:normal}
 .deck{
   font-size:1.13rem;
   font-style:italic;
   color:var(--muted);
   font-weight:300;
   line-height:1.6;
-  max-width:580px;
+  max-width:600px;
   margin-bottom:36px;
   animation:fadeDown .6s .2s ease both;
 }
-
 .byline{
   display:flex;align-items:center;gap:24px;
   font-family:'JetBrains Mono',monospace;
@@ -114,24 +127,20 @@ body::before{
   border-top:1px solid var(--rule);
   animation:fadeDown .6s .3s ease both;
 }
-
 .byline-sep{color:var(--rule)}
-
-/* decorative rule bar */
 .masthead-bar{
-  margin-top:0;
   height:6px;
   background:repeating-linear-gradient(90deg,var(--ink) 0,var(--ink) 60px,var(--amber) 60px,var(--amber) 62px,var(--paper) 62px,var(--paper) 64px);
 }
 
-/* ─── MAIN LAYOUT ──────────────────────────────────── */
+/* ── LAYOUT ──────────────────────────────────────── */
 .article{
-  max-width:740px;
+  max-width:760px;
   margin:0 auto;
-  padding:60px 32px 100px;
+  padding:60px 32px 120px;
 }
 
-/* ─── TYPOGRAPHY ───────────────────────────────────── */
+/* ── TYPOGRAPHY ──────────────────────────────────── */
 p{margin-bottom:1.3em;color:var(--lead)}
 
 h2{
@@ -141,9 +150,7 @@ h2{
   margin:3.5em 0 1em;
   padding-top:3.5em;
   border-top:1.5px solid var(--ink);
-  animation:fadeUp .5s ease both;
 }
-
 h2 .num{
   font-family:'JetBrains Mono',monospace;
   font-size:.6em;font-weight:400;
@@ -151,20 +158,22 @@ h2 .num{
   display:block;margin-bottom:.35em;
   text-transform:uppercase;
 }
-
 h3{
   font-family:'Fraunces',serif;
   font-weight:700;font-size:1.18rem;font-style:italic;
   color:var(--ink);
-  margin:2.4em 0 .8em;
+  margin:2.2em 0 .7em;
+  line-height:1.5;
 }
-
+h3 mjx-container, h3 mjx-container svg{
+  display:inline !important;
+  vertical-align:middle;
+}
 strong{color:var(--ink);font-weight:600}
 em{font-style:italic;color:var(--amber)}
 
-/* ─── LISTS ────────────────────────────────────────── */
+/* ── LISTS ───────────────────────────────────────── */
 ul,ol{list-style:none;margin:1.2em 0 1.6em}
-
 li{
   position:relative;
   padding:.75em 1em .75em 2.6em;
@@ -172,16 +181,15 @@ li{
   border-left:2px solid var(--rule);
   background:var(--card);
   border-radius:0 4px 4px 0;
-  font-size:.96rem;
+  font-size:.97rem;
   color:var(--lead);
+  line-height:1.75;
 }
-
 li::before{
   content:'→';
-  position:absolute;left:.8em;top:.75em;
+  position:absolute;left:.8em;top:.77em;
   color:var(--amber);font-size:.85rem;
 }
-
 ol{counter-reset:li}
 ol li{counter-increment:li}
 ol li::before{
@@ -190,8 +198,11 @@ ol li::before{
   font-size:.72rem;font-weight:500;
   color:var(--amber);top:.85em;
 }
+li p{margin-bottom:.5em;color:var(--lead)}
+li p:last-child{margin-bottom:0}
+li strong{color:var(--ink)}
 
-/* ─── MATH ─────────────────────────────────────────── */
+/* ── MATH ────────────────────────────────────────── */
 .math-block{
   background:var(--card);
   border:1px solid var(--rule);
@@ -202,19 +213,13 @@ ol li::before{
   overflow-x:auto;
   text-align:center;
 }
-
-.math-block mjx-container{
-  font-size:1.08em !important;
-}
-
+.math-block mjx-container{font-size:1.08em !important}
 .math-caption{
   text-align:center;
   font-family:'JetBrains Mono',monospace;
   font-size:.72rem;letter-spacing:.06em;
   color:var(--muted);margin-top:12px;
 }
-
-/* side-by-side math */
 .math-pair{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -228,7 +233,7 @@ ol li::before{
   color:var(--blue);margin-bottom:10px;
 }
 
-/* ─── CALLOUTS ─────────────────────────────────────── */
+/* ── CALLOUTS ────────────────────────────────────── */
 .callout{
   position:relative;
   background:linear-gradient(to right,#fef3e8,#fdf7f0);
@@ -237,7 +242,7 @@ ol li::before{
   border-radius:4px;
   padding:20px 22px;
   margin:2em 0;
-  font-size:.95rem;
+  font-size:.96rem;
   color:#4a3010;
 }
 .callout::before{
@@ -247,7 +252,6 @@ ol li::before{
   font-size:.65rem;letter-spacing:.15em;
   color:var(--amber);margin-bottom:8px;font-weight:500;
 }
-
 .note{
   background:linear-gradient(to right,#eff4fb,#f5f7fc);
   border:1px solid #c0d0e8;
@@ -265,7 +269,6 @@ ol li::before{
   font-size:.65rem;letter-spacing:.15em;
   color:var(--blue);margin-bottom:8px;font-weight:500;
 }
-
 .conclusion{
   background:linear-gradient(to right,#eef8f3,#f2f9f5);
   border:1px solid #b0d8c0;
@@ -283,8 +286,25 @@ ol li::before{
   font-size:.65rem;letter-spacing:.15em;
   color:var(--teal);margin-bottom:8px;font-weight:500;
 }
+.rabbit{
+  background:linear-gradient(to right,#f9f0f8,#f5ecf5);
+  border:1px solid #d0b0cc;
+  border-left:4px solid #8b4a8b;
+  border-radius:4px;
+  padding:18px 22px;
+  margin:2em 0;
+  font-size:.95rem;
+  color:#3a1a3a;
+}
+.rabbit::before{
+  content:'OPEN QUESTION';
+  display:block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.65rem;letter-spacing:.15em;
+  color:#8b4a8b;margin-bottom:8px;font-weight:500;
+}
 
-/* ─── VISUALIZATIONS ───────────────────────────────── */
+/* ── VISUALIZATIONS ──────────────────────────────── */
 .vis{
   margin:2.5em 0;
   background:var(--card);
@@ -292,32 +312,25 @@ ol li::before{
   border-radius:6px;
   overflow:hidden;
 }
-
 .vis-header{
   display:flex;align-items:center;gap:10px;
   padding:13px 20px;
   border-bottom:1px solid var(--rule);
   background:var(--ink);
 }
-
 .vis-header-dot{width:9px;height:9px;border-radius:50%}
 .vis-header-dot:nth-child(1){background:#ff5f57}
 .vis-header-dot:nth-child(2){background:#febc2e}
 .vis-header-dot:nth-child(3){background:#28c840}
-
 .vis-title{
   font-family:'JetBrains Mono',monospace;
   font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
   color:#8890a0;margin-left:4px;
 }
-
-.vis-body{
-  padding:28px 24px;
-}
-
+.vis-body{padding:28px 24px}
 .vis svg{width:100%;height:auto}
 
-/* ─── DIVIDER ──────────────────────────────────────── */
+/* ── DIVIDER ─────────────────────────────────────── */
 .section-break{
   display:flex;align-items:center;gap:12px;
   margin:3.5em 0;
@@ -331,40 +344,53 @@ ol li::before{
   color:var(--muted);
 }
 
-/* ─── ANIMATIONS ───────────────────────────────────── */
+/* ── NEXT PART BOX ───────────────────────────────── */
+.next-part{
+  background:var(--ink);
+  color:#e8dfd0;
+  border-radius:6px;
+  padding:32px 36px;
+  margin:3em 0 0;
+}
+.next-part .np-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:14px;display:block;
+}
+.next-part h3{
+  font-family:'Fraunces',serif;
+  font-size:1.25rem;font-weight:700;font-style:italic;
+  color:#faf7f2;margin:0 0 14px;
+}
+.next-part p{color:#b8a898;font-size:.96rem;margin-bottom:0}
+.next-part strong{color:var(--amber)}
+
+/* ── ANIMATIONS ──────────────────────────────────── */
 @keyframes fadeDown{
   from{opacity:0;transform:translateY(-16px)}
   to{opacity:1;transform:translateY(0)}
 }
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(18px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-/* scroll-triggered fade for sections */
 .reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
 .reveal.visible{opacity:1;transform:none}
 
-/* ─── RESPONSIVE ───────────────────────────────────── */
 @media(max-width:540px){
-  .masthead-inner{padding:0 20px}
-  .article{padding:40px 20px 80px}
-  .math-block{padding:18px 14px}
+  .masthead-inner,.article{padding-left:18px;padding-right:18px}
+  .math-block{padding:18px 12px}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════ MASTHEAD ═══════════ -->
+<!-- ══════════ MASTHEAD ══════════ -->
 <header class="masthead">
   <div class="masthead-inner">
-    <div class="series-flag">Series · Part 01 of N · Langevin Sampling</div>
+    <div class="series-flag">Series · Part 01 · Langevin Sampling</div>
     <h1>Diffusion Models<br>from <span>First Principles</span></h1>
     <p class="deck">Is it just a "Drunkard's Walk" to a cat? Understanding generative AI through Langevin sampling, mathematical physics, and a very lost hiker in the desert.</p>
     <div class="byline">
       <span>Deep Dive</span>
       <span class="byline-sep">·</span>
-      <span>~10 min read</span>
+      <span>~18 min read</span>
       <span class="byline-sep">·</span>
       <span>Generative Modelling</span>
       <span class="byline-sep">·</span>
@@ -374,39 +400,47 @@ ol li::before{
   <div class="masthead-bar"></div>
 </header>
 
-<!-- ═══════════ ARTICLE ═══════════ -->
+<!-- ══════════ ARTICLE ══════════ -->
 <article class="article">
 
-<!-- INTRODUCTION -->
+<!-- ─── INTRODUCTION ─────────────────────────────── -->
 <div class="reveal">
 <p>If you have spent any time looking into modern AI, you have seen the standard explanation for Diffusion Models:</p>
 
-<p><strong>The Forward Process:</strong> You take an image and slowly add Gaussian noise until it's just a cloud of static. <strong>The Reverse Process:</strong> You teach a neural network to "remove" that noise step-by-step to recover the image.</p>
+<p><strong>The Forward Process:</strong> You take an image and slowly add Gaussian noise until it's just a cloud of static.</p>
 
-<p>It sounds simple. Intuitive, even. But if you are like me, the "intuition" didn't quite click at first. It felt a bit like a magic trick — and it left me with a long list of <em>Whys</em>:</p>
+<p><strong>The Reverse Process:</strong> You teach a neural network to "remove" that noise step-by-step to recover the image.</p>
+
+<p>It sounds simple. Intuitive, even. But if you are like me, the "intuition" didn't quite click at first. It felt a bit like a magic trick — and it left me with a long list of "Whys":</p>
 
 <ul>
-  <li><strong>Why does adding noise work?</strong> If our goal is to create data, why do we start by destroying it?</li>
-  <li><strong>What exactly is "noise removal"?</strong> Is the network really just a super-powered denoiser, or is something deeper happening?</li>
-  <li><strong>Is the noise "structured"?</strong> Is that noise so special that its removal magically reveals a cat?</li>
-  <li><strong>The biggest contradiction:</strong> Why do we add <em>even more</em> random Gaussian noise during the reverse process? If we are cleaning the image, why are we still throwing dirt on it?</li>
+  <li><strong>Why does adding noise work in the first place?</strong> If our goal is to create data, why do we start by destroying it?</li>
+  <li><strong>What exactly is "noise removal"?</strong> Is the network really just a super-powered Photoshop denoiser, or is something deeper happening?</li>
+  <li><strong>Is the noise "structured"?</strong> We are told the network removes noise to find an image, but is that noise so special that its removal magically reveals a cat?</li>
+  <li><strong>The biggest contradiction:</strong> Why do we add even more random Gaussian noise during the reverse process? If we are trying to clean the image, why are we still throwing dirt on it as we go?</li>
 </ul>
 
-<p>In reality, that final step is governed by a beautiful piece of math. In actual Diffusion papers, you'll see a formula that looks like this:</p>
+<p>In reality, that final step — the one where we "remove noise" while simultaneously adding more — is governed by a beautiful piece of math. In actual Diffusion papers, you'll see a formula that looks like this:</p>
 
 <div class="math-block">
 $$x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t + (1 - \alpha_t) \nabla \log p_t(x_t) \right) + \color{#c8620a}{\sigma_t \mathbf{z}_t}$$
-<div class="math-caption">The amber term — a fresh burst of random noise added back at every single step</div>
+<div class="math-caption">The amber term — a fresh burst of random Gaussian noise added back at every single step</div>
 </div>
 
-<p>Note the amber term: that is a fresh burst of random Gaussian noise we add back in at every single step. It seems like we are sabotaging the cleanup, but as we will see, this "stochasticity" is the secret ingredient.</p>
+<p>Note the highlighted term: That is a fresh burst of random Gaussian noise we add back in at every single step. It seems like we are sabotaging the cleanup, but as we will see, this "stochasticity" is the secret ingredient.</p>
+
+<p>I realized that to understand the "how," I had to stop looking at it as "image cleaning" and start looking at it from <strong>First Principles</strong>.</p>
+
+<p>In this series, we aren't going to attack the problem structurally or follow a textbook table of contents. Instead, we are going to explore different mathematical and physical concepts and try to map them back to the world of Diffusion. By connecting these dots, we can build a mental model that actually makes sense.</p>
 
 <div class="note">
-  This series will not deal with specific neural network architectures (like U-Nets or Transformers) or niche implementation choices. Our goal is purely to understand the fundamental idea of Diffusion and Generative Modelling from the ground up. We start with <strong>Langevin Sampling</strong>.
-</div>
+  This series will not deal with specific neural network architectures (like U-Nets or Transformers) or the niche implementation choices that different papers might have made. Our goal is purely to understand the fundamental idea of Diffusion and Generative Modelling from the ground up.
 </div>
 
-<!-- VIZ 1: Forward & Reverse Process -->
+<p>In that effort, I am starting our journey with <strong>Langevin Sampling</strong>.</p>
+</div>
+
+<!-- FIG 1: Forward & Reverse -->
 <div class="reveal">
 <div class="vis">
   <div class="vis-header">
@@ -414,700 +448,1306 @@ $$x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t + (1 - \alpha_t) \nabla \log p_
     <span class="vis-title">Figure 1 — The Diffusion Process: Forward &amp; Reverse</span>
   </div>
   <div class="vis-body">
-    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+    <svg viewBox="0 0 720 210" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
       <defs>
-        <marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-          <path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#c8620a" stroke-width="1.5"/>
-        </marker>
-        <marker id="ab" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-          <path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#1d5fa8" stroke-width="1.5"/>
-        </marker>
-        <!-- gradient for noise circles -->
+        <marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#c8620a" stroke-width="1.5"/></marker>
+        <marker id="ab" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7" fill="none" stroke="#1d5fa8" stroke-width="1.5"/></marker>
         <radialGradient id="cg0" cx="50%" cy="40%"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#197a6b"/></radialGradient>
         <radialGradient id="cg1" cx="50%" cy="40%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#c8620a"/></radialGradient>
         <radialGradient id="cg2" cx="50%" cy="40%"><stop offset="0%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#475569"/></radialGradient>
       </defs>
-
-      <!-- FORWARD LABEL -->
       <text x="170" y="22" font-size="9" fill="#c8620a" letter-spacing="2" text-anchor="middle">FORWARD PROCESS  →  DESTRUCTION</text>
-
-      <!-- Forward circles -->
-      <circle cx="60"  cy="100" r="28" fill="url(#cg0)" opacity=".9"/>
-      <text x="60"  y="95"  font-size="18" text-anchor="middle">🐱</text>
-      <text x="60"  y="148" font-size="8.5" fill="#8a8070" text-anchor="middle">t = 0</text>
-      <text x="60"  y="160" font-size="8"   fill="#8a8070" text-anchor="middle">Clean</text>
-
-      <line x1="91" y1="100" x2="129" y2="100" stroke="#c8620a" stroke-width="1.5" marker-end="url(#ar)"/>
-      <text x="110" y="90"  font-size="7.5" fill="#c8620a" text-anchor="middle">+noise</text>
-
-      <circle cx="160" cy="100" r="28" fill="url(#cg1)" opacity=".9"/>
-      <!-- noise dots on middle circle -->
-      <circle cx="152" cy="93"  r="2.5" fill="#fff" opacity=".4"/>
-      <circle cx="168" cy="108" r="2"   fill="#fff" opacity=".4"/>
-      <circle cx="157" cy="110" r="1.5" fill="#fff" opacity=".3"/>
-      <circle cx="170" cy="94"  r="2"   fill="#fff" opacity=".35"/>
-      <text x="160" y="148" font-size="8.5" fill="#8a8070" text-anchor="middle">t = T/2</text>
-      <text x="160" y="160" font-size="8"   fill="#8a8070" text-anchor="middle">Noisy</text>
-
-      <line x1="191" y1="100" x2="229" y2="100" stroke="#c8620a" stroke-width="1.5" marker-end="url(#ar)"/>
-      <text x="210" y="90"  font-size="7.5" fill="#c8620a" text-anchor="middle">+noise</text>
-
-      <circle cx="260" cy="100" r="28" fill="url(#cg2)" opacity=".9"/>
-      <!-- heavy noise on last circle -->
-      <circle cx="250" cy="90"  r="2.5" fill="#fff" opacity=".35"/>
-      <circle cx="265" cy="98"  r="2"   fill="#fff" opacity=".3"/>
-      <circle cx="255" cy="110" r="3"   fill="#fff" opacity=".3"/>
-      <circle cx="272" cy="88"  r="2"   fill="#fff" opacity=".25"/>
-      <circle cx="248" cy="105" r="1.5" fill="#fff" opacity=".2"/>
-      <circle cx="270" cy="112" r="2"   fill="#fff" opacity=".3"/>
-      <text x="260" y="148" font-size="8.5" fill="#8a8070" text-anchor="middle">t = T</text>
-      <text x="260" y="160" font-size="8"   fill="#8a8070" text-anchor="middle">Pure Noise</text>
-
-      <!-- dividing rule -->
-      <line x1="340" y1="20" x2="340" y2="175" stroke="#d6cfc2" stroke-width="1" stroke-dasharray="3,4"/>
-
-      <!-- REVERSE LABEL -->
+      <circle cx="60"  cy="108" r="28" fill="url(#cg0)" opacity=".9"/>
+      <text x="60"  y="103" font-size="18" text-anchor="middle">🐱</text>
+      <text x="60"  y="152" font-size="8.5" fill="#8a8070" text-anchor="middle">t = 0  ·  Clean</text>
+      <line x1="91" y1="108" x2="129" y2="108" stroke="#c8620a" stroke-width="1.5" marker-end="url(#ar)"/>
+      <text x="110" y="98" font-size="7.5" fill="#c8620a" text-anchor="middle">+noise</text>
+      <circle cx="160" cy="108" r="28" fill="url(#cg1)" opacity=".9"/>
+      <circle cx="152" cy="101" r="2.5" fill="#fff" opacity=".4"/><circle cx="168" cy="116" r="2" fill="#fff" opacity=".4"/>
+      <circle cx="157" cy="118" r="1.5" fill="#fff" opacity=".3"/><circle cx="170" cy="102" r="2" fill="#fff" opacity=".35"/>
+      <text x="160" y="152" font-size="8.5" fill="#8a8070" text-anchor="middle">t = T/2  ·  Noisy</text>
+      <line x1="191" y1="108" x2="229" y2="108" stroke="#c8620a" stroke-width="1.5" marker-end="url(#ar)"/>
+      <text x="210" y="98" font-size="7.5" fill="#c8620a" text-anchor="middle">+noise</text>
+      <circle cx="260" cy="108" r="28" fill="url(#cg2)" opacity=".9"/>
+      <circle cx="250" cy="98" r="2.5" fill="#fff" opacity=".35"/><circle cx="265" cy="106" r="2" fill="#fff" opacity=".3"/>
+      <circle cx="255" cy="118" r="3" fill="#fff" opacity=".3"/><circle cx="272" cy="96" r="2" fill="#fff" opacity=".25"/>
+      <circle cx="248" cy="113" r="1.5" fill="#fff" opacity=".2"/><circle cx="270" cy="120" r="2" fill="#fff" opacity=".3"/>
+      <text x="260" y="152" font-size="8.5" fill="#8a8070" text-anchor="middle">t = T  ·  Pure Noise</text>
+      <line x1="340" y1="20" x2="340" y2="180" stroke="#d6cfc2" stroke-width="1" stroke-dasharray="3,4"/>
       <text x="530" y="22" font-size="9" fill="#1d5fa8" letter-spacing="2" text-anchor="middle">←  REVERSE PROCESS  ·  GENERATION</text>
-
-      <!-- Reverse circles (mirror) -->
-      <circle cx="420" cy="100" r="28" fill="url(#cg2)" opacity=".9"/>
-      <circle cx="410" cy="90"  r="2.5" fill="#fff" opacity=".35"/>
-      <circle cx="427" cy="108" r="2"   fill="#fff" opacity=".3"/>
-      <circle cx="415" cy="112" r="3"   fill="#fff" opacity=".3"/>
-      <text x="420" y="148" font-size="8.5" fill="#8a8070" text-anchor="middle">t = T</text>
-      <text x="420" y="160" font-size="8"   fill="#8a8070" text-anchor="middle">Start: Noise</text>
-
-      <line x1="451" y1="100" x2="489" y2="100" stroke="#1d5fa8" stroke-width="1.5" marker-end="url(#ab)"/>
-      <text x="470" y="90"  font-size="7.5" fill="#1d5fa8" text-anchor="middle">denoise</text>
-
-      <circle cx="520" cy="100" r="28" fill="url(#cg1)" opacity=".9"/>
-      <circle cx="512" cy="93"  r="2.5" fill="#fff" opacity=".25"/>
-      <circle cx="527" cy="108" r="1.5" fill="#fff" opacity=".2"/>
-      <text x="520" y="148" font-size="8.5" fill="#8a8070" text-anchor="middle">t = T/2</text>
-      <text x="520" y="160" font-size="8"   fill="#8a8070" text-anchor="middle">Denoising</text>
-
-      <line x1="551" y1="100" x2="589" y2="100" stroke="#1d5fa8" stroke-width="1.5" marker-end="url(#ab)"/>
-      <text x="570" y="90"  font-size="7.5" fill="#1d5fa8" text-anchor="middle">denoise</text>
-
-      <circle cx="620" cy="100" r="28" fill="url(#cg0)" opacity=".9"/>
-      <text x="620" y="95"  font-size="18" text-anchor="middle">🐱</text>
-      <text x="620" y="148" font-size="8.5" fill="#8a8070" text-anchor="middle">t = 0</text>
-      <text x="620" y="160" font-size="8"   fill="#8a8070" text-anchor="middle">New Image!</text>
+      <circle cx="420" cy="108" r="28" fill="url(#cg2)" opacity=".9"/>
+      <circle cx="410" cy="98" r="2.5" fill="#fff" opacity=".35"/><circle cx="427" cy="116" r="2" fill="#fff" opacity=".3"/>
+      <circle cx="415" cy="120" r="3" fill="#fff" opacity=".3"/>
+      <text x="420" y="152" font-size="8.5" fill="#8a8070" text-anchor="middle">t = T  ·  Start: Noise</text>
+      <line x1="451" y1="108" x2="489" y2="108" stroke="#1d5fa8" stroke-width="1.5" marker-end="url(#ab)"/>
+      <text x="470" y="98" font-size="7.5" fill="#1d5fa8" text-anchor="middle">denoise</text>
+      <circle cx="520" cy="108" r="28" fill="url(#cg1)" opacity=".9"/>
+      <circle cx="512" cy="101" r="2.5" fill="#fff" opacity=".25"/><circle cx="527" cy="116" r="1.5" fill="#fff" opacity=".2"/>
+      <text x="520" y="152" font-size="8.5" fill="#8a8070" text-anchor="middle">t = T/2  ·  Denoising</text>
+      <line x1="551" y1="108" x2="589" y2="108" stroke="#1d5fa8" stroke-width="1.5" marker-end="url(#ab)"/>
+      <text x="570" y="98" font-size="7.5" fill="#1d5fa8" text-anchor="middle">denoise</text>
+      <circle cx="620" cy="108" r="28" fill="url(#cg0)" opacity=".9"/>
+      <text x="620" y="103" font-size="18" text-anchor="middle">🐱</text>
+      <text x="620" y="152" font-size="8.5" fill="#8a8070" text-anchor="middle">t = 0  ·  New Image!</text>
     </svg>
   </div>
 </div>
 </div>
 
-<!-- ───────────── SECTION 1 ───────────── -->
+<!-- ─── SECTION 1 ─────────────────────────────────── -->
 <h2 class="reveal"><span class="num">Section 01</span>What is Generation, Really?</h2>
 
 <div class="reveal">
 <p><strong>If we strip away all the AI buzzwords, generation is nothing but sampling.</strong></p>
-<p>Whenever we talk about "generating" something — an image, a sentence, or a protein sequence — what we are actually doing is picking a single point out of a massive collection of possibilities. How we sample from a known distribution <em>is</em> the generation process itself.</p>
+
+<p>Whenever we talk about "generating" something — be it an image, a sentence, or a protein sequence — what we are actually doing is picking a single point out of a massive collection of possibilities. How we are able to sample from a known distribution is the generation process itself.</p>
 
 <h3>The Simple Die (Discrete Sampling)</h3>
-<p>If I ask you to "generate" a random number between 1 and 6, you reach for a die. When you roll it and it lands on 4, you have successfully "generated" data. We are working with discrete variables — a <strong>Probability Mass Function (PMF)</strong>:</p>
+
+<p>If I ask you to "generate" a random number between 1 and 6, you reach for a die. When you roll that die and it lands on a 4, you have successfully "generated" data.</p>
+
+<p>When we use a die, we are working with discrete variables. This is what mathematicians call a <strong>Probability Mass Function (PMF)</strong>. Think of it as a row of 6 buckets. Every time you roll, you have a $1/6$ chance of landing in any specific bucket.</p>
 
 <div class="math-block">
-$$P(X=k) = \frac{1}{6} \quad \text{for } k = 1, 2, \ldots, 6$$
-</div>
+$$P(X=1) = \tfrac{1}{6},\quad P(X=2) = \tfrac{1}{6},\quad \dots,\quad P(X=6) = \tfrac{1}{6}$$
 </div>
 
-<!-- VIZ 2: Die / PMF -->
+<p>The "generation" here is easy because the options are finite and the probability is known.</p>
+</div>
+
+<!-- FIG 2: PMF Die -->
 <div class="reveal">
 <div class="vis">
   <div class="vis-header">
     <div class="vis-header-dot"></div><div class="vis-header-dot"></div><div class="vis-header-dot"></div>
-    <span class="vis-title">Figure 2 — Discrete Sampling: Probability Mass Function</span>
+    <span class="vis-title">Figure 2 — Discrete Sampling: Probability Mass Function (PMF)</span>
   </div>
   <div class="vis-body">
-    <svg viewBox="0 0 640 180" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
-      <!-- Axes -->
-      <line x1="60" y1="140" x2="600" y2="140" stroke="#d6cfc2" stroke-width="1.5"/>
-      <line x1="60" y1="20"  x2="60"  y2="145" stroke="#d6cfc2" stroke-width="1.5"/>
-      <!-- Y label -->
-      <text x="14" y="82" font-size="8" fill="#8a8070" transform="rotate(-90,14,82)" letter-spacing="1">PROBABILITY</text>
-      <!-- X label -->
-      <text x="330" y="168" font-size="8" fill="#8a8070" text-anchor="middle" letter-spacing="1">OUTCOME</text>
-
-      <!-- Grid line at 1/6 -->
-      <line x1="58" y1="62" x2="600" y2="62" stroke="#d6cfc2" stroke-width=".8" stroke-dasharray="3,5"/>
-      <text x="50" y="65" font-size="8" fill="#8a8070" text-anchor="end">1/6</text>
-
-      <!-- Bars -->
-      <g>
-        <!-- face 1 -->
-        <rect x="90"  y="62" width="52" height="78" fill="#1d5fa8" opacity=".18" rx="2"/>
-        <rect x="90"  y="62" width="52" height="78" fill="none" stroke="#1d5fa8" stroke-width="1.5" rx="2"/>
-        <text x="116" y="56" font-size="9" fill="#1d5fa8" text-anchor="middle">⚀</text>
-        <text x="116" y="155" font-size="9" fill="#8a8070" text-anchor="middle">1</text>
-
-        <!-- face 2 -->
-        <rect x="170" y="62" width="52" height="78" fill="#1d5fa8" opacity=".18" rx="2"/>
-        <rect x="170" y="62" width="52" height="78" fill="none" stroke="#1d5fa8" stroke-width="1.5" rx="2"/>
-        <text x="196" y="56" font-size="9" fill="#1d5fa8" text-anchor="middle">⚁</text>
-        <text x="196" y="155" font-size="9" fill="#8a8070" text-anchor="middle">2</text>
-
-        <!-- face 3 -->
-        <rect x="250" y="62" width="52" height="78" fill="#1d5fa8" opacity=".18" rx="2"/>
-        <rect x="250" y="62" width="52" height="78" fill="none" stroke="#1d5fa8" stroke-width="1.5" rx="2"/>
-        <text x="276" y="56" font-size="9" fill="#1d5fa8" text-anchor="middle">⚂</text>
-        <text x="276" y="155" font-size="9" fill="#8a8070" text-anchor="middle">3</text>
-
-        <!-- face 4 — HIGHLIGHTED (rolled) -->
-        <rect x="330" y="48" width="52" height="92" fill="#c8620a" opacity=".22" rx="2"/>
-        <rect x="330" y="48" width="52" height="92" fill="none" stroke="#c8620a" stroke-width="2" rx="2"/>
-        <text x="356" y="42" font-size="9" fill="#c8620a" text-anchor="middle">⚃</text>
-        <text x="356" y="155" font-size="9" fill="#c8620a" text-anchor="middle" font-weight="600">4 ✓</text>
-        <text x="356" y="30" font-size="7.5" fill="#c8620a" text-anchor="middle" letter-spacing=".5">rolled!</text>
-
-        <!-- face 5 -->
-        <rect x="410" y="62" width="52" height="78" fill="#1d5fa8" opacity=".18" rx="2"/>
-        <rect x="410" y="62" width="52" height="78" fill="none" stroke="#1d5fa8" stroke-width="1.5" rx="2"/>
-        <text x="436" y="56" font-size="9" fill="#1d5fa8" text-anchor="middle">⚄</text>
-        <text x="436" y="155" font-size="9" fill="#8a8070" text-anchor="middle">5</text>
-
-        <!-- face 6 -->
-        <rect x="490" y="62" width="52" height="78" fill="#1d5fa8" opacity=".18" rx="2"/>
-        <rect x="490" y="62" width="52" height="78" fill="none" stroke="#1d5fa8" stroke-width="1.5" rx="2"/>
-        <text x="516" y="56" font-size="9" fill="#1d5fa8" text-anchor="middle">⚅</text>
-        <text x="516" y="155" font-size="9" fill="#8a8070" text-anchor="middle">6</text>
-      </g>
+    <svg viewBox="0 0 640 190" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+      <line x1="60" y1="145" x2="610" y2="145" stroke="#d6cfc2" stroke-width="1.5"/>
+      <line x1="60" y1="20"  x2="60"  y2="150" stroke="#d6cfc2" stroke-width="1.5"/>
+      <text x="18" y="85" font-size="8" fill="#8a8070" transform="rotate(-90,18,85)" letter-spacing="1">PROBABILITY</text>
+      <text x="335" y="175" font-size="8" fill="#8a8070" text-anchor="middle" letter-spacing="1">OUTCOME (face of die)</text>
+      <line x1="58" y1="67" x2="610" y2="67" stroke="#d6cfc2" stroke-width=".8" stroke-dasharray="3,5"/>
+      <text x="52" y="70" font-size="8" fill="#8a8070" text-anchor="end">1/6</text>
+      <!-- 6 bars -->
+      <rect x="80"  y="67" width="52" height="78" fill="#1d5fa8" opacity=".15" rx="2"/>
+      <rect x="80"  y="67" width="52" height="78" fill="none" stroke="#1d5fa8" stroke-width="1.5" rx="2"/>
+      <text x="106" y="60" font-size="10" fill="#1d5fa8" text-anchor="middle">⚀</text>
+      <text x="106" y="162" font-size="9" fill="#8a8070" text-anchor="middle">1</text>
+      <rect x="158" y="67" width="52" height="78" fill="#1d5fa8" opacity=".15" rx="2"/>
+      <rect x="158" y="67" width="52" height="78" fill="none" stroke="#1d5fa8" stroke-width="1.5" rx="2"/>
+      <text x="184" y="60" font-size="10" fill="#1d5fa8" text-anchor="middle">⚁</text>
+      <text x="184" y="162" font-size="9" fill="#8a8070" text-anchor="middle">2</text>
+      <rect x="236" y="67" width="52" height="78" fill="#1d5fa8" opacity=".15" rx="2"/>
+      <rect x="236" y="67" width="52" height="78" fill="none" stroke="#1d5fa8" stroke-width="1.5" rx="2"/>
+      <text x="262" y="60" font-size="10" fill="#1d5fa8" text-anchor="middle">⚂</text>
+      <text x="262" y="162" font-size="9" fill="#8a8070" text-anchor="middle">3</text>
+      <!-- face 4 highlighted -->
+      <rect x="314" y="52" width="52" height="93" fill="#c8620a" opacity=".18" rx="2"/>
+      <rect x="314" y="52" width="52" height="93" fill="none" stroke="#c8620a" stroke-width="2" rx="2"/>
+      <text x="340" y="45" font-size="10" fill="#c8620a" text-anchor="middle">⚃</text>
+      <text x="340" y="162" font-size="9" fill="#c8620a" text-anchor="middle" font-weight="600">4 ← rolled!</text>
+      <rect x="392" y="67" width="52" height="78" fill="#1d5fa8" opacity=".15" rx="2"/>
+      <rect x="392" y="67" width="52" height="78" fill="none" stroke="#1d5fa8" stroke-width="1.5" rx="2"/>
+      <text x="418" y="60" font-size="10" fill="#1d5fa8" text-anchor="middle">⚄</text>
+      <text x="418" y="162" font-size="9" fill="#8a8070" text-anchor="middle">5</text>
+      <rect x="470" y="67" width="52" height="78" fill="#1d5fa8" opacity=".15" rx="2"/>
+      <rect x="470" y="67" width="52" height="78" fill="none" stroke="#1d5fa8" stroke-width="1.5" rx="2"/>
+      <text x="496" y="60" font-size="10" fill="#1d5fa8" text-anchor="middle">⚅</text>
+      <text x="496" y="162" font-size="9" fill="#8a8070" text-anchor="middle">6</text>
     </svg>
   </div>
 </div>
 </div>
 
 <div class="reveal">
+<h3>Moving to the Continuous World</h3>
+
+<p>But what if we aren't rolling a die? What if we are measuring something that doesn't fit into neat buckets — like the exact temperature in your room?</p>
+
+<p>In the continuous world, we use a <strong>Probability Density Function (PDF)</strong>, denoted as $p(x)$. Here, we don't ask "What is the probability of the temperature being exactly $22.000000°C$?" (which is technically zero). Instead, we look at the "density" — how likely is it that the temperature is <em>around</em> $22°C$?</p>
+
 <h3>The Image Space (The 1,000,000-Sided Die)</h3>
-<p>Now map this back to images. A 1000×1000 pixel grayscale image lives in a <strong>1,000,000-dimensional space</strong> — one point per image. To "generate" a new cat, we are essentially trying to roll a 1,000,000-dimensional die.</p>
-<p>In this unfathomably large space, almost every "roll" results in noise. But somewhere in that desert, there are tiny <em>"islands" of high probability</em> — specific configurations of those million pixels that represent a cat.</p>
+
+<p>Now, let's map this back to images. Imagine a 1000×1000 pixel grayscale image. Because there are 1,000,000 pixels, one single image is a single point in a <strong>1,000,000-dimensional space</strong>.</p>
+
+<p>To "generate" a new image of a cat, we are essentially trying to roll a 1,000,000-dimensional die. In this unfathomably large space, almost every "roll" results in noise. But somewhere in that desert, there are tiny "islands" of high probability — specific configurations of those million pixels that represent a "cat."</p>
 
 <div class="callout">
-  Deep Generative Modeling is nothing more than finding a way to sample from that high-dimensional probability distribution. The catch? In reality, this distribution is <strong>unknown</strong>. We have cat photos, but not the mathematical equation for "cat-ness."
-</div>
+  <strong>The Big Statement:</strong> Deep Generative Modeling is nothing more than finding a way to sample from that high-dimensional probability distribution.
 </div>
 
-<!-- VIZ 3: Desert / Cat Island -->
+<p>The catch? In reality, this distribution is <strong>unknown</strong>. We have a collection of cat photos, but we don't have the mathematical equation for "Cat-ness." If we had the formula, we could just roll the die and be done. But we don't. We are standing in the dark, in a massive desert of noise, trying to find a tiny island without a map.</p>
+</div>
+
+<!-- FIG 3: Desert / Cat Island -->
 <div class="reveal">
 <div class="vis">
   <div class="vis-header">
     <div class="vis-header-dot"></div><div class="vis-header-dot"></div><div class="vis-header-dot"></div>
-    <span class="vis-title">Figure 3 — The High-Dimensional Desert: Probability Landscape</span>
+    <span class="vis-title">Figure 3 — The High-Dimensional Desert: Finding "Cat Island"</span>
   </div>
   <div class="vis-body">
     <svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
       <defs>
-        <radialGradient id="island" cx="50%" cy="50%">
-          <stop offset="0%" stop-color="#197a6b" stop-opacity=".9"/>
-          <stop offset="40%" stop-color="#4ade80" stop-opacity=".5"/>
-          <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="desert" cx="50%" cy="50%">
-          <stop offset="0%" stop-color="#f2ede4"/>
-          <stop offset="100%" stop-color="#e8dfd0"/>
-        </radialGradient>
-        <!-- hiker glow -->
-        <radialGradient id="hikerglow" cx="50%" cy="50%">
-          <stop offset="0%" stop-color="#c8620a" stop-opacity=".25"/>
-          <stop offset="100%" stop-color="#c8620a" stop-opacity="0"/>
-        </radialGradient>
+        <radialGradient id="islandG" cx="50%" cy="50%"><stop offset="0%" stop-color="#197a6b" stop-opacity=".9"/><stop offset="40%" stop-color="#4ade80" stop-opacity=".5"/><stop offset="100%" stop-color="#4ade80" stop-opacity="0"/></radialGradient>
+        <radialGradient id="desertG" cx="50%" cy="50%"><stop offset="0%" stop-color="#f2ede4"/><stop offset="100%" stop-color="#e8dfd0"/></radialGradient>
+        <radialGradient id="hikerGlow" cx="50%" cy="50%"><stop offset="0%" stop-color="#c8620a" stop-opacity=".3"/><stop offset="100%" stop-color="#c8620a" stop-opacity="0"/></radialGradient>
       </defs>
-
-      <!-- Desert base -->
-      <rect width="700" height="240" fill="url(#desert)" rx="2"/>
-
-      <!-- Subtle grid suggesting dimensions -->
-      <g stroke="#d6cfc2" stroke-width=".4" opacity=".6">
-        <line x1="0" y1="60"  x2="700" y2="60"/>
-        <line x1="0" y1="120" x2="700" y2="120"/>
-        <line x1="0" y1="180" x2="700" y2="180"/>
-        <line x1="140" y1="0" x2="140" y2="240"/>
-        <line x1="280" y1="0" x2="280" y2="240"/>
-        <line x1="420" y1="0" x2="420" y2="240"/>
-        <line x1="560" y1="0" x2="560" y2="240"/>
+      <rect width="700" height="240" fill="url(#desertG)" rx="2"/>
+      <g stroke="#d6cfc2" stroke-width=".4" opacity=".5">
+        <line x1="0" y1="60" x2="700" y2="60"/><line x1="0" y1="120" x2="700" y2="120"/><line x1="0" y1="180" x2="700" y2="180"/>
+        <line x1="140" y1="0" x2="140" y2="240"/><line x1="280" y1="0" x2="280" y2="240"/>
+        <line x1="420" y1="0" x2="420" y2="240"/><line x1="560" y1="0" x2="560" y2="240"/>
       </g>
-
-      <!-- Noise dots scattered -->
-      <g fill="#8a8070" opacity=".4">
-        <circle cx="50"  cy="40"  r="1.8"/><circle cx="80"  cy="175" r="1.5"/>
-        <circle cx="120" cy="55"  r="2"/>  <circle cx="170" cy="190" r="1.5"/>
-        <circle cx="200" cy="80"  r="1.8"/><circle cx="240" cy="30"  r="2"/>
-        <circle cx="290" cy="160" r="1.5"/><circle cx="320" cy="205" r="1.8"/>
-        <circle cx="90"  cy="130" r="2"/>  <circle cx="150" cy="145" r="1.5"/>
-        <circle cx="470" cy="35"  r="1.8"/><circle cx="510" cy="185" r="2"/>
-        <circle cx="570" cy="60"  r="1.5"/><circle cx="600" cy="210" r="1.8"/>
-        <circle cx="640" cy="100" r="2"/>  <circle cx="670" cy="150" r="1.5"/>
-        <circle cx="490" cy="140" r="1.8"/><circle cx="540" cy="95"  r="1.5"/>
-        <circle cx="620" cy="45"  r="2"/>  <circle cx="660" cy="190" r="1.8"/>
+      <!-- scattered noise dots -->
+      <g fill="#8a8070" opacity=".35">
+        <circle cx="50" cy="40" r="1.8"/><circle cx="80" cy="175" r="1.5"/><circle cx="120" cy="55" r="2"/>
+        <circle cx="170" cy="190" r="1.5"/><circle cx="200" cy="80" r="1.8"/><circle cx="240" cy="30" r="2"/>
+        <circle cx="90" cy="130" r="2"/><circle cx="150" cy="145" r="1.5"/><circle cx="320" cy="205" r="1.8"/>
+        <circle cx="470" cy="35" r="1.8"/><circle cx="510" cy="185" r="2"/><circle cx="570" cy="60" r="1.5"/>
+        <circle cx="600" cy="210" r="1.8"/><circle cx="640" cy="100" r="2"/><circle cx="670" cy="150" r="1.5"/>
+        <circle cx="490" cy="140" r="1.8"/><circle cx="540" cy="95" r="1.5"/><circle cx="620" cy="45" r="2"/>
+        <circle cx="660" cy="190" r="1.8"/><circle cx="300" cy="70" r="1.5"/><circle cx="60" cy="210" r="1.8"/>
       </g>
-
       <!-- Cat Island -->
-      <ellipse cx="370" cy="150" rx="72" ry="52" fill="url(#island)"/>
-      <ellipse cx="370" cy="150" rx="72" ry="52" fill="none" stroke="#197a6b" stroke-width="1.5" stroke-dasharray="4,3"/>
-      <text x="370" y="142" font-size="30" text-anchor="middle">🐱</text>
-      <text x="370" y="175" font-size="8" fill="#197a6b" text-anchor="middle" letter-spacing="1.5" font-weight="500">CAT ISLAND</text>
-      <text x="370" y="188" font-size="7" fill="#197a6b" text-anchor="middle" opacity=".7">high probability region</text>
-
-      <!-- Hiker glow + dot -->
-      <circle cx="115" cy="95" r="22" fill="url(#hikerglow)"/>
-      <circle cx="115" cy="95" r="7"  fill="#c8620a" stroke="#faf7f2" stroke-width="1.5"/>
-      <text x="115" y="76" font-size="7.5" fill="#c8620a" text-anchor="middle" letter-spacing=".5">HIKER</text>
-      <text x="115" y="86" font-size="7"   fill="#8a8070" text-anchor="middle">dropped here</text>
-
-      <!-- Question arrows indicating scale -->
-      <text x="350" y="22"  font-size="7.5" fill="#8a8070" text-anchor="middle" letter-spacing=".5">1,000,000-DIMENSIONAL SPACE — ALMOST EVERYTHING IS NOISE</text>
+      <ellipse cx="370" cy="155" rx="72" ry="52" fill="url(#islandG)"/>
+      <ellipse cx="370" cy="155" rx="72" ry="52" fill="none" stroke="#197a6b" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="370" y="148" font-size="30" text-anchor="middle">🐱</text>
+      <text x="370" y="177" font-size="7.5" fill="#197a6b" text-anchor="middle" letter-spacing="1.5">CAT ISLAND</text>
+      <text x="370" y="190" font-size="7" fill="#197a6b" text-anchor="middle" opacity=".7">high probability region</text>
+      <!-- Hiker -->
+      <circle cx="110" cy="100" r="22" fill="url(#hikerGlow)"/>
+      <circle cx="110" cy="100" r="7" fill="#c8620a" stroke="#faf7f2" stroke-width="1.5"/>
+      <text x="110" y="80" font-size="7.5" fill="#c8620a" text-anchor="middle">HIKER</text>
+      <text x="110" y="90" font-size="7" fill="#8a8070" text-anchor="middle">dropped here</text>
+      <text x="110" y="120" font-size="6.5" fill="#b83030" text-anchor="middle">no map!</text>
+      <!-- label -->
+      <text x="350" y="20" font-size="7.5" fill="#8a8070" text-anchor="middle" letter-spacing=".5">1,000,000-DIMENSIONAL SPACE — ALMOST EVERYTHING IS NOISE</text>
     </svg>
   </div>
 </div>
 </div>
 
-<!-- ───────────── SECTION 2 ───────────── -->
+<!-- ─── SECTION 2 ─────────────────────────────────── -->
 <h2 class="reveal"><span class="num">Section 02</span>The Wonderful Realization: Sculpting with Noise</h2>
 
 <div class="reveal">
-<p><strong>Here is the "Aha!" moment.</strong> What if I told you we can sample from <em>any</em> complex distribution using only two ingredients?</p>
+<p>Here is the "Aha!" moment. What if I told you that we can sample from <em>any</em> complex distribution using only two ingredients?</p>
+
 <ul>
-  <li><strong>Gaussian Noise</strong> — a simple cloud of random static (The Engine)</li>
-  <li><strong>A Magic Compass</strong> — something technical people call the Score Function (The Guide)</li>
+  <li><strong>Gaussian Noise:</strong> A simple cloud of random static (The Engine).</li>
+  <li><strong>A Magic Compass:</strong> Something technical people call the Score Function (The Guide).</li>
 </ul>
-<p>This is the essence of <em>Langevin Sampling</em>.</p>
+
+<p>This is the essence of <strong>Langevin Sampling</strong>.</p>
 
 <h3>The Gradient: Finding the "North" of Data</h3>
-<p>Imagine we actually had the secret recipe — the analytical formula $P(x)$ — for our target distribution. From that formula we can compute its <strong>Gradient</strong> $\nabla P(x)$: a vector pointing in the direction of steepest ascent. Like standing on a mountain in fog — the gradient tells you not just which way to go, but how steep the slope is, hinting at the step size needed to reach the peak.</p>
+
+<p>Imagine for a second that we actually had the secret recipe — the analytical formula $P(x)$ — for our target distribution. If we have that formula, we can find its <strong>Gradient</strong> ($\nabla P(x)$).</p>
+
+<p>A gradient is just a vector that points in the direction of the "steepest ascent." Imagine you are standing on a mountain in a thick fog. That gradient doesn't just tell you which way to go; its magnitude tells you how "steep" the hill is, essentially giving you a hint on how big of a step to take to reach the peak.</p>
 
 <h3>The "Log" Twist: The Score Function</h3>
-<p>In practice, we don't use $\nabla P(x)$. We use the gradient of its <em>logarithm</em>:</p>
+
+<p>But in practice, we don't look at the gradient of $P(x)$. We look at the gradient of the <strong>Logarithm</strong> of $P(x)$:</p>
 
 <div class="math-block">
-$$\text{Score Function} \;=\; \nabla \log p(x)$$
-<div class="math-caption">The compass that points toward high-probability regions</div>
+$$\text{Score Function} = \nabla \log p(x)$$
+<div class="math-caption">The compass that always points toward higher-probability regions</div>
 </div>
 
-<p><strong>Why the log?</strong> In high dimensions, the raw probability $P(x)$ of being in a cat region is so infinitesimally small that $\nabla P(x)$ becomes effectively zero — the slope is too flat to feel. By taking the logarithm, we mathematically "stretch" the landscape, turning flat plains into steep, feelable slopes.</p>
+<p><strong>Why the "Log"?</strong> In high dimensions, the raw probability $P(x)$ of being a cat is so infinitesimally small when you are in the "noise desert" that the gradient $\nabla P(x)$ becomes effectively zero. The "slope" is too flat to feel. By taking the Logarithm, we mathematically "stretch" the landscape, turning flat plains into steep, feelable slopes.</p>
 
 <h3>For the Mathematically Inclined: The Proof</h3>
-<p>From the chain rule:</p>
+
+<p>Look at the basic derivative of a logarithm using the chain rule:</p>
+
 <div class="math-block">
-$$\frac{d}{dx} \log p(x) \;=\; \frac{p'(x)}{p(x)}$$
+$$\frac{d}{dx} \log p(x) = \frac{p'(x)}{p(x)}$$
 </div>
 
-<p>Suppose $p(x) = e^{-x^2}$ (a Gaussian). Compare the raw gradient vs. the score at $x = 10$:</p>
-</div>
+<p><strong>Example:</strong> Suppose our data follows a simple Gaussian: $p(x) = e^{-x^2}$.</p>
 
-<div class="reveal">
 <div class="math-pair">
   <div class="math-block">
-    <div class="math-pair-label">Raw Gradient  ∇p(x)</div>
-    $$p'(x) = -2x\, e^{-x^2}$$
-    <div class="math-caption" style="color:#b83030">At x=10 → p(10) ≈ 3.7×10⁻⁴⁴ · · · vanishes to zero. Compass is dead.</div>
+    <div class="math-pair-label">Raw Gradient  p′(x)</div>
+    $$p'(x) = -2x\,e^{-x^2}$$
+    <div class="math-caption" style="color:#b83030">At x = 10 → p(10) ≈ 3.7 × 10⁻⁴⁴<br>Vanishingly small. Our compass is dead.</div>
   </div>
   <div class="math-block">
     <div class="math-pair-label">Score Function  ∇ log p(x)</div>
-    $$\frac{d}{dx}\log p(x) = -2x$$
-    <div class="math-caption" style="color:#197a6b">At x=10 → score = −20. Clear, usable signal!</div>
+    $$\frac{d}{dx}\log p(x) = \frac{-2x\,e^{-x^2}}{e^{-x^2}} = -2x$$
+    <div class="math-caption" style="color:#197a6b">At x = 10 → score = −20<br>Clear, strong signal!</div>
   </div>
 </div>
 
-<p>The division by $p(x)$ cancelled the exponential decay that was killing our signal. The score is a <em>rescaled</em> gradient that remains informative even far from the data.</p>
+<p>The division by $p(x)$ "canceled out" the exponential decay that was killing our signal! 🎯</p>
 
 <h3>But How Do We Find This Score Function?</h3>
-<p>You might object: <em>"You just derived this using P(x), but you said P(x) is unknown!"</em></p>
-<p>Correct. This is the "million-dollar problem." In the real world, this is exactly what the <strong>Neural Network</strong> learns. When you see a U-Net "predicting noise," it is actually predicting the gradient of the log probability. These gradients <em>look</em> like noise when visualized in high dimensions, but they are precise instructions for our walk.</p>
+
+<h3>The Secret of the Neural Network</h3>
+
+<p>You might argue: <em>"You just said the Probability distribution is unknown, but your derivation explicitly uses P(x)!"</em></p>
+
+<p>If you caught that, you are 100% correct. This is the "million-dollar problem." I showed the math to prove the point, but in the real world, this is exactly what we use the <strong>Neural Network</strong> for.</p>
+
+<p>When you see a U-Net architecture "predicting noise," it is actually predicting the <strong>Gradient of the Log Probability</strong>. It is astonishing to realize that after all, it was not "noise" it was predicting — it was the <em>score</em>. These gradients look like noise when we visualize them in high dimensions, but they are actually precise instructions for our walk.</p>
 </div>
 
-<!-- ───────────── SECTION 3 ───────────── -->
-<h2 class="reveal"><span class="num">Section 03</span>The Langevin Walk: A Helicopter Drop into Noise</h2>
-
-<div class="reveal">
-<p>Now we have our ingredients. Let's build the image intuitively.</p>
-<p>Imagine you are dropped from a helicopter at a random point $x_0$ in a 1,000,000-dimensional desert. You see nothing but static. But you have your trusty Score Function Compass.</p>
-
-<h3>The Step</h3>
-<p>You check the compass at $x_0$. It tells you how much and in which direction to move:</p>
-<div class="math-block">
-$$x_1 = x_0 + \eta \,\nabla \log p(x_0)$$
-<div class="math-caption">η (eta) = step size. How much we trust the compass.</div>
-</div>
-
-<h3>The Optimization Trap</h3>
-<p>If you only followed the compass, everyone dropped from the helicopter would converge to the exact same "perfect average cat." We would lose all variety — generating a single blurry mean rather than diverse samples.</p>
-
-<h3>The "Jiggle": Introducing Randomness</h3>
-<p>To see the <em>whole</em> island, you need to dance as you walk. Every time you take a step toward the peak, you take a tiny random hop in a random direction. This gives us the full <strong>Langevin Equation</strong>:</p>
-
-<div class="math-block">
-$$x_{t+1} = x_t + \underbrace{\eta \,\nabla \log p(x_t)}_{\text{Drift (Compass)}} + \underbrace{\color{#c8620a}{\sqrt{2\eta}\;\mathbf{z}_t}}_{\text{Diffusion (Jiggle)}}$$
-<div class="math-caption">The amber term is what makes generation diverse. Without it, every sample is identical.</div>
-</div>
-
-<p><strong>Why $\sqrt{2\eta}$ specifically?</strong> Three reasons:</p>
-<ul>
-  <li><strong>The √η scaling:</strong> In Brownian motion, random kicks grow with the square root of time, keeping the noise-to-drift ratio consistent across different step sizes.</li>
-  <li><strong>The factor of 2:</strong> This is the mathematical "sweet spot" that ensures the walk settles into the exact shape of p(x) — not a wider or narrower version.</li>
-  <li><strong>Why Gaussian?</strong> The Central Limit Theorem: the sum of millions of tiny independent kicks always converges to a Gaussian. It's the only jiggle that allows perfectly smooth exploration.</li>
-</ul>
-</div>
-
-<!-- VIZ 4: The Langevin Walk -->
+<!-- FIG 4: Log transform — stretch the landscape -->
 <div class="reveal">
 <div class="vis">
   <div class="vis-header">
     <div class="vis-header-dot"></div><div class="vis-header-dot"></div><div class="vis-header-dot"></div>
-    <span class="vis-title">Figure 4 — The Langevin Walk: Drift + Diffusion</span>
+    <span class="vis-title">Figure 4 — Why Logarithm? Stretching the Probability Landscape</span>
+  </div>
+  <div class="vis-body">
+    <svg viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+      <defs>
+        <marker id="grnA" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#197a6b"/></marker>
+      </defs>
+      <!-- LEFT: raw probability -->
+      <text x="145" y="18" font-size="9" fill="#b83030" text-anchor="middle" letter-spacing="1">RAW PROBABILITY  p(x)</text>
+      <line x1="30" y1="155" x2="280" y2="155" stroke="#d6cfc2" stroke-width="1.5"/>
+      <line x1="30" y1="20"  x2="30"  y2="160" stroke="#d6cfc2" stroke-width="1.5"/>
+      <!-- near-flat curve that rises only at very right -->
+      <path d="M35,153 L160,152 Q190,148 210,135 Q230,115 270,30" stroke="#b83030" stroke-width="2.5" fill="none"/>
+      <text x="145" y="172" font-size="8" fill="#8a8070" text-anchor="middle">Flat for most of desert</text>
+      <text x="145" y="184" font-size="7.5" fill="#b83030" text-anchor="middle">gradient ≈ 0  ·  compass dead</text>
+      <!-- Hiker stuck on flat part -->
+      <circle cx="80" cy="149" r="6" fill="#c8620a" stroke="#faf7f2" stroke-width="1.2"/>
+      <text x="80" cy="138" y="138" font-size="7" fill="#8a8070" text-anchor="middle">hiker — no signal!</text>
+
+      <!-- Arrow between -->
+      <line x1="305" y1="88" x2="368" y2="88" stroke="#197a6b" stroke-width="2" marker-end="url(#grnA)"/>
+      <text x="337" y="78"  font-size="9"   fill="#197a6b" text-anchor="middle" font-weight="500">log( )</text>
+      <text x="337" y="102" font-size="7"   fill="#8a8070" text-anchor="middle">transform</text>
+
+      <!-- RIGHT: log probability -->
+      <text x="540" y="18" font-size="9" fill="#197a6b" text-anchor="middle" letter-spacing="1">LOG PROBABILITY  log p(x)</text>
+      <line x1="390" y1="155" x2="680" y2="155" stroke="#d6cfc2" stroke-width="1.5"/>
+      <line x1="390" y1="20"  x2="390" y2="160" stroke="#d6cfc2" stroke-width="1.5"/>
+      <!-- smooth, broad slope from left rising to right -->
+      <path d="M395,153 Q440,140 490,118 Q540,88 590,52 Q630,28 670,18" stroke="#197a6b" stroke-width="2.5" fill="none"/>
+      <text x="540" y="172" font-size="8" fill="#8a8070" text-anchor="middle">Gentle slope across entire landscape</text>
+      <text x="540" y="184" font-size="7.5" fill="#197a6b" text-anchor="middle">gradient usable from far away!</text>
+      <!-- Hiker getting signal -->
+      <circle cx="448" cy="138" r="6" fill="#c8620a" stroke="#faf7f2" stroke-width="1.2"/>
+      <text x="448" y="127" font-size="7" fill="#197a6b" text-anchor="middle">hiker feels slope!</text>
+      <!-- small gradient arrow on slope -->
+      <line x1="455" y1="133" x2="475" y2="120" stroke="#1d5fa8" stroke-width="1.5" marker-end="url(#grnA)"/>
+    </svg>
+  </div>
+</div>
+</div>
+
+<!-- ─── SECTION 3 ─────────────────────────────────── -->
+<h2 class="reveal"><span class="num">Section 03</span>The Langevin Walk: A Helicopter Drop into Noise</h2>
+
+<div class="reveal">
+<p><strong>Now we have our ingredients. Let's walk through building the image intuitively.</strong></p>
+
+<p>Imagine you are dropped from a helicopter at a random point $x_0$ in a 1,000,000-dimensional desert. You see nothing but static. But you have your trusty Score Function Compass.</p>
+
+<h3>The Step</h3>
+
+<p>You check the compass at $x_0$. It tells you how much and in which direction to move:</p>
+
+<div class="math-block">
+$$x_1 = x_0 + \underbrace{\eta \,\nabla \log p(x_0)}_{\text{The Step}}$$
+<div class="math-caption">η (eta) = Step Size (Learning Rate). How much we trust the compass.</div>
+</div>
+
+<p>Here, $\eta$ represents how much we trust our compass.</p>
+
+<h3>The Optimization Trap</h3>
+
+<p>If you only followed the compass, everyone dropped from the helicopter would converge to the exact same "perfect" average cat. We'd lose all variety.</p>
+
+<h3>The "Jiggle": Introducing Randomness</h3>
+
+<p>To see the whole island, you need to "dance" as you walk. Every time you take a step toward the peak, you take a tiny, random hop in a random direction.</p>
+
+<p>This gives us the <strong>Langevin Equation</strong>:</p>
+
+<div class="math-block">
+$$x_{t+1} = x_t + \underbrace{\eta \,\nabla \log p(x_t)}_{\text{The Compass Guide (Drift)}} + \underbrace{\color{#c8620a}{\sqrt{2\eta}\;\mathbf{z}_t}}_{\text{The Random Jiggle (Diffusion)}}$$
+<div class="math-caption">The amber term is what prevents collapse to a single point — it is the secret to diverse generation</div>
+</div>
+
+<h3>Why a "Gaussian" Jiggle scaled by $\sqrt{2\eta}$?</h3>
+
+<p>Why that specific factor? It's about <strong>Equilibrium</strong>.</p>
+
+<ul>
+  <li><strong>The $\sqrt{\eta}$ Scaling:</strong> In Brownian motion, random kicks grow with the square root of time. This factor ensures the "push" of noise and the "pull" of the drift stay in a consistent ratio as you change step sizes.</li>
+  <li><strong>The Factor of 2:</strong> This is the mathematical "sweet spot" that ensures the walk settles into the exact shape of $p(x)$ — not a wider or narrower approximation of it.</li>
+  <li><strong>Why Gaussian?</strong> Because nature is Gaussian. The sum of millions of tiny, independent kicks (water molecules hitting a dust particle) always results in a Gaussian distribution — the Central Limit Theorem. It is the only "jiggle" that allows for perfectly smooth exploration.</li>
+</ul>
+</div>
+
+<!-- FIG 5: Langevin Walk -->
+<div class="reveal">
+<div class="vis">
+  <div class="vis-header">
+    <div class="vis-header-dot"></div><div class="vis-header-dot"></div><div class="vis-header-dot"></div>
+    <span class="vis-title">Figure 5 — The Langevin Walk: Drift + Diffusion Together</span>
   </div>
   <div class="vis-body">
     <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
       <defs>
-        <radialGradient id="landG" cx="50%" cy="38%">
-          <stop offset="0%"   stop-color="#4ade80" stop-opacity=".55"/>
-          <stop offset="45%"  stop-color="#fbbf24" stop-opacity=".28"/>
-          <stop offset="100%" stop-color="#f2ede4"  stop-opacity=".0"/>
+        <radialGradient id="landG2" cx="50%" cy="35%">
+          <stop offset="0%"   stop-color="#4ade80" stop-opacity=".5"/>
+          <stop offset="45%"  stop-color="#fbbf24" stop-opacity=".25"/>
+          <stop offset="100%" stop-color="#f2ede4"  stop-opacity="0"/>
         </radialGradient>
-        <marker id="blu" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8" fill="none" stroke="#1d5fa8" stroke-width="1.5"/>
-        </marker>
-        <marker id="amb" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8" fill="none" stroke="#c8620a" stroke-width="1.5"/>
-        </marker>
-        <marker id="grn" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8" fill="none" stroke="#197a6b" stroke-width="1.5"/>
-        </marker>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="4" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
+        <marker id="bluA" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#1d5fa8" stroke-width="1.5"/></marker>
+        <marker id="ambA" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#c8620a" stroke-width="1.5"/></marker>
+        <marker id="grnA2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#197a6b" stroke-width="1.5"/></marker>
+        <filter id="glow2"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
-
-      <!-- Probability landscape -->
-      <ellipse cx="380" cy="175" rx="290" ry="110" fill="url(#landG)"/>
-
-      <!-- Contour rings suggesting topology -->
-      <ellipse cx="380" cy="120" rx="55"  ry="38"  fill="none" stroke="#197a6b" stroke-width=".8" opacity=".35"/>
-      <ellipse cx="380" cy="130" rx="110" ry="65"  fill="none" stroke="#4ade80" stroke-width=".7" opacity=".25"/>
-      <ellipse cx="380" cy="145" rx="175" ry="92"  fill="none" stroke="#fbbf24" stroke-width=".6" opacity=".2"/>
-
-      <!-- Peak (Cat Island) -->
-      <circle cx="380" cy="108" r="32" fill="#197a6b" opacity=".2" filter="url(#glow)"/>
-      <circle cx="380" cy="108" r="26" fill="#0d3028" stroke="#197a6b" stroke-width="1.5"/>
-      <text x="380" y="116" font-size="22" text-anchor="middle">🐱</text>
-      <text x="380" y="80" font-size="7.5" fill="#4ade80" text-anchor="middle" letter-spacing="1">PEAK  ·  HIGH p(x)</text>
-
-      <!-- Walk path - organic curved trajectory -->
-      <!-- Start point -->
+      <!-- Landscape -->
+      <ellipse cx="380" cy="175" rx="290" ry="108" fill="url(#landG2)"/>
+      <!-- Contour rings -->
+      <ellipse cx="380" cy="120" rx="52"  ry="36"  fill="none" stroke="#197a6b" stroke-width=".8" opacity=".3"/>
+      <ellipse cx="380" cy="132" rx="108" ry="62"  fill="none" stroke="#4ade80" stroke-width=".7" opacity=".22"/>
+      <ellipse cx="380" cy="148" rx="172" ry="88"  fill="none" stroke="#fbbf24" stroke-width=".6" opacity=".18"/>
+      <!-- Peak -->
+      <circle cx="380" cy="108" r="30" fill="#197a6b" opacity=".18" filter="url(#glow2)"/>
+      <circle cx="380" cy="108" r="24" fill="#0d3028" stroke="#197a6b" stroke-width="1.5"/>
+      <text x="380" y="116" font-size="20" text-anchor="middle">🐱</text>
+      <text x="380" y="82" font-size="7.5" fill="#4ade80" text-anchor="middle" letter-spacing="1">PEAK  ·  HIGH p(x)</text>
+      <!-- Start -->
       <circle cx="110" cy="200" r="7" fill="#c8620a" stroke="#faf7f2" stroke-width="1.5"/>
       <text x="110" y="220" font-size="7" fill="#8a8070" text-anchor="middle">start x₀</text>
-
-      <!-- Step breakdown: drift vector (blue) -->
-      <line x1="110" y1="200" x2="162" y2="172" stroke="#1d5fa8" stroke-width="2.5" stroke-dasharray="none" marker-end="url(#blu)"/>
-      <text x="118" y="178" font-size="7.5" fill="#1d5fa8" text-anchor="middle">η∇log p</text>
-      <text x="118" y="188" font-size="7"   fill="#1d5fa8" text-anchor="middle" opacity=".7">(drift)</text>
-
-      <!-- Step breakdown: jiggle vector (amber) -->
-      <line x1="162" y1="172" x2="195" y2="155" stroke="#c8620a" stroke-width="2.5" stroke-dasharray="5,3" marker-end="url(#amb)"/>
-      <text x="198" y="148" font-size="7.5" fill="#c8620a">√2η z</text>
-      <text x="198" y="158" font-size="7"   fill="#c8620a" opacity=".7">(jiggle)</text>
-
-      <!-- Net step (green) -->
-      <line x1="110" y1="200" x2="195" y2="155" stroke="#197a6b" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#grn)" opacity=".7"/>
-      <text x="130" y="193" font-size="6.5" fill="#197a6b" opacity=".8">net step</text>
-
-      <!-- Subsequent walk steps (just positions) -->
-      <circle cx="195" cy="155" r="5" fill="#fbbf24" stroke="#faf7f2" stroke-width="1" opacity=".9"/>
-      <circle cx="252" cy="140" r="5" fill="#fbbf24" stroke="#faf7f2" stroke-width="1" opacity=".9"/>
-      <circle cx="308" cy="126" r="5" fill="#fbbf24" stroke="#faf7f2" stroke-width="1" opacity=".85"/>
-      <circle cx="350" cy="115" r="5" fill="#4ade80" stroke="#faf7f2" stroke-width="1" opacity=".85"/>
-
-      <!-- Connecting faint lines -->
-      <polyline points="195,155 252,140 308,126 350,115" fill="none" stroke="#8a8070" stroke-width="1" stroke-dasharray="3,4" opacity=".5"/>
-
+      <!-- Drift vector -->
+      <line x1="110" y1="200" x2="163" y2="172" stroke="#1d5fa8" stroke-width="2.5" marker-end="url(#bluA)"/>
+      <text x="112" y="178" font-size="7.5" fill="#1d5fa8">η∇log p</text>
+      <text x="112" y="188" font-size="7"   fill="#1d5fa8" opacity=".7">(drift)</text>
+      <!-- Jiggle vector -->
+      <line x1="163" y1="172" x2="200" y2="155" stroke="#c8620a" stroke-width="2.5" stroke-dasharray="5,3" marker-end="url(#ambA)"/>
+      <text x="208" y="150" font-size="7.5" fill="#c8620a">√2η z</text>
+      <text x="208" y="160" font-size="7"   fill="#c8620a" opacity=".7">(jiggle)</text>
+      <!-- Net step -->
+      <line x1="110" y1="200" x2="200" y2="155" stroke="#197a6b" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#grnA2)" opacity=".7"/>
+      <text x="138" y="194" font-size="6.5" fill="#197a6b" opacity=".8">net step</text>
+      <!-- Subsequent walk positions -->
+      <circle cx="200" cy="155" r="5" fill="#fbbf24" stroke="#faf7f2" stroke-width="1" opacity=".9"/>
+      <circle cx="256" cy="140" r="5" fill="#fbbf24" stroke="#faf7f2" stroke-width="1" opacity=".88"/>
+      <circle cx="310" cy="126" r="5" fill="#fbbf24" stroke="#faf7f2" stroke-width="1" opacity=".85"/>
+      <circle cx="350" cy="116" r="5" fill="#4ade80" stroke="#faf7f2" stroke-width="1" opacity=".85"/>
+      <polyline points="200,155 256,140 310,126 350,116" fill="none" stroke="#8a8070" stroke-width="1" stroke-dasharray="3,4" opacity=".5"/>
       <!-- Legend -->
-      <rect x="520" y="195" width="160" height="90" fill="#faf7f2" stroke="#d6cfc2" stroke-width="1" rx="3" opacity=".95"/>
-      <text x="600" y="211" font-size="7" fill="#8a8070" text-anchor="middle" letter-spacing="1">LEGEND</text>
-      <line x1="533" y1="224" x2="555" y2="224" stroke="#1d5fa8" stroke-width="2"/>
-      <text x="560" y="227" font-size="7.5" fill="#3d3628">Drift ← score</text>
-      <line x1="533" y1="242" x2="555" y2="242" stroke="#c8620a" stroke-width="2" stroke-dasharray="4,2"/>
-      <text x="560" y="245" font-size="7.5" fill="#3d3628">Diffusion (jiggle)</text>
-      <circle cx="543" cy="261" r="4" fill="#fbbf24"/>
-      <text x="560" y="264" font-size="7.5" fill="#3d3628">Walk positions</text>
-      <circle cx="543" cy="278" r="4" fill="#4ade80"/>
-      <text x="560" y="281" font-size="7.5" fill="#3d3628">Near peak</text>
+      <rect x="520" y="195" width="162" height="95" fill="#faf7f2" stroke="#d6cfc2" stroke-width="1" rx="3" opacity=".95"/>
+      <text x="601" y="211" font-size="7" fill="#8a8070" text-anchor="middle" letter-spacing="1">LEGEND</text>
+      <line x1="533" y1="226" x2="558" y2="226" stroke="#1d5fa8" stroke-width="2"/>
+      <text x="563" y="229" font-size="7.5" fill="#3d3628">Drift (score)</text>
+      <line x1="533" y1="244" x2="558" y2="244" stroke="#c8620a" stroke-width="2" stroke-dasharray="4,2"/>
+      <text x="563" y="247" font-size="7.5" fill="#3d3628">Diffusion (jiggle)</text>
+      <circle cx="544" cy="262" r="4" fill="#fbbf24"/>
+      <text x="563" y="265" font-size="7.5" fill="#3d3628">Walk positions xₜ</text>
+      <circle cx="544" cy="280" r="4" fill="#4ade80"/>
+      <text x="563" y="283" font-size="7.5" fill="#3d3628">Near peak</text>
     </svg>
   </div>
 </div>
 </div>
 
-<!-- ───────────── SECTION 4 ───────────── -->
+<!-- ─── SECTION 4 ─────────────────────────────────── -->
 <h2 class="reveal"><span class="num">Section 04</span>The Grand Connection: Mapping Langevin Back to Diffusion</h2>
 
 <div class="reveal">
-<p>Look at the "scary" formula from the introduction side-by-side with our Langevin walk:</p>
+<p>Look at the "scary" formula from the start side-by-side with our walk:</p>
 
-<div class="math-pair">
-  <div class="math-block">
-    <div class="math-pair-label">Diffusion Reverse Step (from papers)</div>
-    $$x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \!\left( x_t + (1-\alpha_t)\nabla \log p_t(x_t) \right) + \color{#c8620a}{\sigma_t \mathbf{z}_t}$$
-  </div>
-  <div class="math-block">
-    <div class="math-pair-label">Our Langevin Walk</div>
-    $$x_{t+1} = x_t + \eta\,\nabla \log p(x_t) + \color{#c8620a}{\sqrt{2\eta}\,\mathbf{z}_t}$$
-  </div>
+<p><strong>Actual Diffusion Reverse Step:</strong></p>
+<div class="math-block">
+$$x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t + (1 - \alpha_t) \nabla \log p_t(x_t) \right) + \color{#c8620a}{\sigma_t \mathbf{z}_t}$$
+</div>
+
+<p><strong>Our Langevin Walk:</strong></p>
+<div class="math-block">
+$$x_{t+1} = x_t + \eta\,\nabla \log p(x_t) + \color{#c8620a}{\sqrt{2\eta}\,\mathbf{z}_t}$$
 </div>
 
 <div class="conclusion">
-  The math is the same. The coefficients are just "volume knobs" — $\frac{1}{\sqrt{\alpha_t}}$ and $(1-\alpha_t)$ are engineered so the noise schedule anneals correctly. We have proven: <strong>Generation is nothing but sampling.</strong>
+  The math is the same. The coefficients are just "volume knobs" — $\frac{1}{\sqrt{\alpha_t}}$ and $(1-\alpha_t)$ are engineered so the noise schedule anneals correctly over $T$ steps. We have successfully proven that <strong>Generation is nothing but sampling.</strong>
+</div>
+
+<h3>But the Rabbit Hole Goes Deeper...</h3>
+
+<p>Even though we've demystified the "walk," many questions remain:</p>
+
+<div class="rabbit">
+  <strong>Why does it settle?</strong> What invisible force stops the "jiggle" from eventually pushing us back out into the desert forever?
 </div>
 </div>
 
-<!-- ───────────── SECTION 5 ───────────── -->
-<h2 class="reveal"><span class="num">Section 05</span>Conclusion: But the Rabbit Hole Goes Deeper</h2>
+<!-- ─── SECTION 5 ─────────────────────────────────── -->
+<h2 class="reveal"><span class="num">Section 05</span>Conclusion: Generation is Just Sampling</h2>
 
 <div class="reveal">
-<p>When you see a state-of-the-art AI model creating a photo of a cat, it is just a very sophisticated hiker dropped into a 1,000,000-dimensional desert, using a compass learned from millions of photos to take a guided walk through noise.</p>
+<p>We have successfully proven that <strong>Generation is nothing but sampling</strong>. When you see a state-of-the-art AI model creating a photo of a cat, it is just a very sophisticated hiker dropped into a 1,000,000-dimensional desert, using a compass learned from millions of photos to take a guided walk through noise.</p>
 
-<p>But even though we've demystified the "walk," a few things should still feel like magic:</p>
+<p>But even though we've demystified the "walk," the rabbit hole goes much deeper. If you're thinking from first principles, a few things should still feel like "magic":</p>
 
 <ol>
   <li>
-    <strong>Why does the walk actually settle?</strong><br>
-    If we're constantly adding noise, why don't particles fly off forever? The answer is <em>Equilibrium</em>. Think of a valley with a fan at the bottom: drift is gravity pulling to the center, diffusion is the fan pushing away. Langevin Dynamics proves these forces cancel in exactly the right way — particles spend more time where probability is high, without flying away or collapsing to a single point.
+    <p><strong>Why does the walk actually settle?</strong></p>
+    <p>You might wonder: if we are constantly adding noise (the "jiggle"), why don't the particles eventually just fly off into the desert forever?</p>
+    <p>The answer lies in a beautiful physical <strong>Equilibrium</strong>. Think of a valley with a powerful fan blowing at the bottom. The "Drift" is gravity pulling you to the center; the "Noise" is the fan pushing you away. Langevin Dynamics is the mathematical proof that these two forces eventually cancel each other out in a way that the particles spend more time where the probability is high, perfectly tracing the "shape" of the data without ever flying away or collapsing to a single point.</p>
   </li>
   <li>
-    <strong>The Denoising Trick: How is "Noise" a "Gradient"?</strong><br>
-    If you take a clean cat photo and add noise, the Score (direction back to the cat) is exactly the <em>opposite</em> of the noise you added. Teaching a model to predict the noise implicitly teaches it the gradient. <strong>Predicting noise is predicting the gradient.</strong>
+    <p><strong>The Denoising Trick: How is "Noise" a "Gradient"?</strong></p>
+    <p>This was the biggest "Aha!" moment for me. In every Diffusion paper, the U-Net is trained to predict the noise that was added to an image. But we just said the U-Net is a Score Predictor (predicting gradients).</p>
+    <p><strong>How are they the same thing?</strong></p>
+    <p>Think about it: if you take a clean photo of a cat and push it into the desert with a bit of noise, the "Score" (the direction back to the cat) is exactly the <em>opposite</em> of the noise you just added. By teaching a model to guess what the noise was, you are implicitly teaching it the exact vector it needs to move in to get back to the "Cat Island." <strong>Predicting noise is predicting the gradient.</strong></p>
   </li>
   <li>
-    <strong>The "Curse of Flatness" and the Forward Process</strong><br>
-    In 1,000,000 dimensions, "Cat Island" is infinitesimally small — a hiker will almost never feel its slope. By adding noise to training data (the Forward Process), we <em>blur</em> the island, stretching its slope across the entire desert. We break the data to make the path back to it visible.
+    <p><strong>The "Curse of Flatness" and the Forward Process</strong></p>
+    <p>If we want to generate cats, why do we start by destroying them with the "Forward Process"?</p>
+    <p>In a 1,000,000-dimensional space, "Cat Island" is infinitesimally small. If you drop a hiker at random, they will almost never feel the slope of the island because the rest of the desert is perfectly flat.</p>
+    <p>By adding noise to our training data (The Forward Process), we are effectively "blurring" the island, stretching its slope across the entire desert. We create a "gradient trail" that the hiker can feel from miles away. <strong>We break the data to make the path back to it visible.</strong></p>
   </li>
 </ol>
 </div>
 
-<!-- VIZ 5: Equilibrium — Drift vs Diffusion -->
+<!-- FIG 6: Equilibrium -->
 <div class="reveal">
 <div class="vis">
   <div class="vis-header">
     <div class="vis-header-dot"></div><div class="vis-header-dot"></div><div class="vis-header-dot"></div>
-    <span class="vis-title">Figure 5 — Equilibrium: Drift vs. Diffusion Forces</span>
+    <span class="vis-title">Figure 6 — Why Does the Walk Settle? Drift vs. Diffusion Equilibrium</span>
   </div>
   <div class="vis-body">
-    <svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+    <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
       <defs>
-        <linearGradient id="valleyG" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#e8dfd0"/>
-          <stop offset="100%" stop-color="#f2ede4"/>
+        <linearGradient id="valG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e8dfd0"/><stop offset="100%" stop-color="#f2ede4"/>
         </linearGradient>
-        <marker id="downM" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto">
-          <path d="M0,0 L4,8 L8,0" fill="none" stroke="#1d5fa8" stroke-width="1.8"/>
-        </marker>
-        <marker id="upM" markerWidth="8" markerHeight="8" refX="4" refY="1" orient="auto">
-          <path d="M0,8 L4,0 L8,8" fill="none" stroke="#c8620a" stroke-width="1.8"/>
-        </marker>
+        <marker id="downBlue" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto"><path d="M0,0 L4,8 L8,0" fill="none" stroke="#1d5fa8" stroke-width="1.8"/></marker>
+        <marker id="outAmber" markerWidth="8" markerHeight="8" refX="4" refY="1" orient="auto"><path d="M0,8 L4,0 L8,8" fill="none" stroke="#c8620a" stroke-width="1.8"/></marker>
       </defs>
-
-      <!-- Valley shape -->
-      <path d="M30,50 Q175,220 350,225 Q525,220 670,50" fill="url(#valleyG)" stroke="#d6cfc2" stroke-width="1.5"/>
-      <!-- Floor highlight -->
-      <path d="M140,185 Q350,230 560,185" fill="none" stroke="#b8a898" stroke-width=".8" stroke-dasharray="4,4"/>
-
-      <!-- Floor label -->
-      <text x="350" y="248" font-size="7.5" fill="#8a8070" text-anchor="middle" letter-spacing=".5">VALLEY FLOOR  ·  EQUILIBRIUM ZONE</text>
-
-      <!-- Particles in equilibrium -->
-      <circle cx="230" cy="196" r="9" fill="#1c1812" opacity=".85" stroke="#faf7f2" stroke-width="1.2"/>
-      <circle cx="310" cy="213" r="9" fill="#1c1812" opacity=".85" stroke="#faf7f2" stroke-width="1.2"/>
-      <circle cx="390" cy="218" r="9" fill="#1c1812" opacity=".85" stroke="#faf7f2" stroke-width="1.2"/>
-      <circle cx="470" cy="213" r="9" fill="#1c1812" opacity=".85" stroke="#faf7f2" stroke-width="1.2"/>
-
-      <!-- Drift forces (down arrows - blue) -->
-      <line x1="230" y1="186" x2="230" y2="162" stroke="#1d5fa8" stroke-width="2" marker-end="url(#downM)"/>
-      <line x1="390" y1="209" x2="390" y2="185" stroke="#1d5fa8" stroke-width="2" marker-end="url(#downM)"/>
-      <line x1="470" y1="204" x2="470" y2="180" stroke="#1d5fa8" stroke-width="2" marker-end="url(#downM)"/>
-
-      <!-- Diffusion forces (up/out arrows - amber) -->
-      <line x1="310" y1="204" x2="285" y2="185" stroke="#c8620a" stroke-width="2" marker-end="url(#upM)"/>
-      <line x1="310" y1="204" x2="335" y2="185" stroke="#c8620a" stroke-width="2" marker-end="url(#upM)"/>
-
-      <!-- Balance = sign -->
-      <text x="350" y="158" font-size="11" fill="#197a6b" text-anchor="middle" font-weight="600">Drift  =  Diffusion</text>
-      <text x="350" y="172" font-size="7.5" fill="#8a8070" text-anchor="middle" opacity=".8">at equilibrium, the two forces cancel</text>
-
+      <!-- Valley -->
+      <path d="M30,45 Q175,215 350,220 Q525,215 670,45" fill="url(#valG)" stroke="#d6cfc2" stroke-width="1.5"/>
+      <path d="M140,180 Q350,225 560,180" fill="none" stroke="#b8a898" stroke-width=".8" stroke-dasharray="4,4"/>
+      <text x="350" y="245" font-size="7.5" fill="#8a8070" text-anchor="middle" letter-spacing=".5">VALLEY FLOOR  ·  EQUILIBRIUM ZONE</text>
+      <!-- Fan at bottom -->
+      <text x="350" y="218" font-size="14" text-anchor="middle">💨</text>
+      <!-- Particles -->
+      <circle cx="230" cy="192" r="9" fill="#1c1812" opacity=".82" stroke="#faf7f2" stroke-width="1.2"/>
+      <circle cx="310" cy="208" r="9" fill="#1c1812" opacity=".82" stroke="#faf7f2" stroke-width="1.2"/>
+      <circle cx="390" cy="213" r="9" fill="#1c1812" opacity=".82" stroke="#faf7f2" stroke-width="1.2"/>
+      <circle cx="470" cy="208" r="9" fill="#1c1812" opacity=".82" stroke="#faf7f2" stroke-width="1.2"/>
+      <!-- Drift arrows (gravity inward/down) -->
+      <line x1="230" y1="183" x2="230" y2="160" stroke="#1d5fa8" stroke-width="2" marker-end="url(#downBlue)"/>
+      <line x1="390" y1="204" x2="390" y2="181" stroke="#1d5fa8" stroke-width="2" marker-end="url(#downBlue)"/>
+      <line x1="470" y1="199" x2="470" y2="176" stroke="#1d5fa8" stroke-width="2" marker-end="url(#downBlue)"/>
+      <!-- Diffusion arrows (fan pushing outward) -->
+      <line x1="310" y1="199" x2="284" y2="180" stroke="#c8620a" stroke-width="2" marker-end="url(#outAmber)"/>
+      <line x1="310" y1="199" x2="336" y2="180" stroke="#c8620a" stroke-width="2" marker-end="url(#outAmber)"/>
+      <!-- Balance label -->
+      <text x="350" y="148" font-size="10.5" fill="#197a6b" text-anchor="middle" font-weight="600">Drift  =  Diffusion</text>
+      <text x="350" y="162"  font-size="7.5"  fill="#8a8070"  text-anchor="middle">forces cancel → particles stay in high-probability zone</text>
       <!-- Legend -->
-      <line x1="40" y1="100" x2="40" y2="76" stroke="#1d5fa8" stroke-width="2" marker-end="url(#downM)"/>
-      <text x="55" y="94" font-size="7.5" fill="#1d5fa8">Drift (gravity inward)</text>
-      <line x1="40" y1="130" x2="55" y2="110" stroke="#c8620a" stroke-width="2" marker-end="url(#upM)"/>
-      <text x="68" y="124" font-size="7.5" fill="#c8620a">Diffusion (noise outward)</text>
+      <line x1="40" y1="95" x2="40" y2="72" stroke="#1d5fa8" stroke-width="2" marker-end="url(#downBlue)"/>
+      <text x="56" y="88" font-size="7.5" fill="#1d5fa8">Drift (gravity inward)</text>
+      <line x1="40" y1="122" x2="58" y2="103" stroke="#c8620a" stroke-width="2" marker-end="url(#outAmber)"/>
+      <text x="70" y="118" font-size="7.5" fill="#c8620a">Diffusion (fan outward)</text>
     </svg>
   </div>
 </div>
 </div>
 
-<!-- VIZ 6: Noise = Gradient (Denoising trick) -->
+<!-- FIG 7: Noise = Gradient -->
 <div class="reveal">
 <div class="vis">
   <div class="vis-header">
     <div class="vis-header-dot"></div><div class="vis-header-dot"></div><div class="vis-header-dot"></div>
-    <span class="vis-title">Figure 6 — The Key Equivalence: Predicting Noise = Predicting the Score</span>
+    <span class="vis-title">Figure 7 — The Denoising Trick: Predicting Noise = Predicting the Score</span>
   </div>
   <div class="vis-body">
     <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
       <defs>
-        <marker id="thickR" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8" fill="#c8620a"/>
-        </marker>
-        <marker id="thickG" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8" fill="#197a6b"/>
-        </marker>
+        <marker id="rA" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#8a8070"/></marker>
+        <marker id="gA" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#197a6b"/></marker>
       </defs>
-
-      <!-- STEP 1: clean + noise -->
-      <rect x="20" y="20" width="180" height="160" fill="#f2ede4" stroke="#d6cfc2" stroke-width="1" rx="4"/>
-      <text x="110" y="14" font-size="8" fill="#8a8070" text-anchor="middle" letter-spacing="1">STEP 1 — ADD NOISE</text>
-
-      <!-- Clean cat -->
-      <circle cx="80" cy="80" r="30" fill="#197a6b" opacity=".15" stroke="#197a6b" stroke-width="1.5"/>
-      <text x="80" y="88" font-size="26" text-anchor="middle">🐱</text>
-      <text x="80" y="122" font-size="7.5" fill="#8a8070" text-anchor="middle">clean  x₀</text>
-
-      <!-- Plus sign -->
-      <text x="118" y="84" font-size="22" fill="#8a8070" text-anchor="middle">+</text>
-
-      <!-- Noise blob -->
-      <circle cx="156" cy="78" r="24" fill="#c8620a" opacity=".12" stroke="#c8620a" stroke-width="1.2" stroke-dasharray="3,3"/>
+      <!-- Box 1 -->
+      <rect x="18" y="18" width="180" height="165" fill="#f2ede4" stroke="#d6cfc2" stroke-width="1" rx="4"/>
+      <text x="108" y="12" font-size="8" fill="#8a8070" text-anchor="middle" letter-spacing="1">STEP 1 — FORWARD</text>
+      <circle cx="78" cy="80" r="30" fill="#197a6b" opacity=".14" stroke="#197a6b" stroke-width="1.5"/>
+      <text x="78" y="88" font-size="24" text-anchor="middle">🐱</text>
+      <text x="78" y="122" font-size="7.5" fill="#8a8070" text-anchor="middle">clean x₀</text>
+      <text x="118" y="84" font-size="20" fill="#8a8070" text-anchor="middle">+</text>
+      <circle cx="156" cy="78" r="24" fill="#c8620a" opacity=".1" stroke="#c8620a" stroke-width="1.2" stroke-dasharray="3,3"/>
       <text x="156" y="86" font-size="20" text-anchor="middle">🌫</text>
       <text x="156" y="115" font-size="7.5" fill="#c8620a" text-anchor="middle">noise ε</text>
-
-      <!-- Equals -->
-      <text x="110" y="154" font-size="7.5" fill="#8a8070" text-anchor="middle">→  noisy image xₜ</text>
-
-      <!-- Big arrow -->
-      <line x1="215" y1="100" x2="268" y2="100" stroke="#8a8070" stroke-width="2" marker-end="url(#thickR)"/>
-      <text x="242" y="92" font-size="7" fill="#8a8070" text-anchor="middle">encode</text>
-
-      <!-- STEP 2: noisy image → predict noise -->
-      <rect x="280" y="20" width="160" height="160" fill="#f2ede4" stroke="#d6cfc2" stroke-width="1" rx="4"/>
-      <text x="360" y="14" font-size="8" fill="#8a8070" text-anchor="middle" letter-spacing="1">STEP 2 — MODEL PREDICTS</text>
-
-      <circle cx="360" cy="80" r="30" fill="#c8620a" opacity=".12" stroke="#c8620a" stroke-width="1.2" stroke-dasharray="3,3"/>
-      <text x="360" y="88" font-size="26" text-anchor="middle">🌫</text>
-      <text x="360" y="122" font-size="7.5" fill="#8a8070" text-anchor="middle">noisy image xₜ</text>
-      <text x="360" y="150" font-size="7.5" fill="#c8620a" text-anchor="middle">↓ predict  ε̂</text>
-      <text x="360" y="164" font-size="7.5" fill="#c8620a" text-anchor="middle">= predict score!</text>
-
-      <!-- Big arrow 2 -->
-      <line x1="455" y1="100" x2="508" y2="100" stroke="#8a8070" stroke-width="2" marker-end="url(#thickG)"/>
-      <text x="482" y="92" font-size="7" fill="#8a8070" text-anchor="middle">−ε̂ =</text>
-
-      <!-- STEP 3: the score = negative noise -->
-      <rect x="520" y="20" width="160" height="160" fill="#eef8f3" stroke="#b0d8c0" stroke-width="1" rx="4"/>
-      <text x="600" y="14" font-size="8" fill="#197a6b" text-anchor="middle" letter-spacing="1">= THE SCORE ∇log p</text>
-
-      <circle cx="600" cy="80" r="30" fill="#197a6b" opacity=".15" stroke="#197a6b" stroke-width="1.5"/>
-      <text x="600" y="88" font-size="26" text-anchor="middle">🧭</text>
-      <text x="600" y="122" font-size="7.5" fill="#197a6b" text-anchor="middle">direction back to</text>
-      <text x="600" y="134" font-size="7.5" fill="#197a6b" text-anchor="middle">Cat Island</text>
-      <text x="600" y="155" font-size="7"   fill="#197a6b" text-anchor="middle" opacity=".7">negative noise</text>
-      <text x="600" y="167" font-size="7"   fill="#197a6b" text-anchor="middle" opacity=".7">= gradient</text>
+      <text x="108" y="155" font-size="7.5" fill="#8a8070" text-anchor="middle">→ noisy image  xₜ</text>
+      <!-- arrow -->
+      <line x1="202" y1="100" x2="250" y2="100" stroke="#8a8070" stroke-width="2" marker-end="url(#rA)"/>
+      <text x="226" y="92" font-size="7" fill="#8a8070" text-anchor="middle">encode</text>
+      <!-- Box 2 -->
+      <rect x="262" y="18" width="176" height="165" fill="#f2ede4" stroke="#d6cfc2" stroke-width="1" rx="4"/>
+      <text x="350" y="12" font-size="8" fill="#8a8070" text-anchor="middle" letter-spacing="1">STEP 2 — MODEL PREDICTS</text>
+      <circle cx="350" cy="80" r="30" fill="#c8620a" opacity=".1" stroke="#c8620a" stroke-width="1.2" stroke-dasharray="3,3"/>
+      <text x="350" y="88" font-size="24" text-anchor="middle">🌫</text>
+      <text x="350" y="122" font-size="7.5" fill="#8a8070" text-anchor="middle">noisy xₜ → predict ε̂</text>
+      <text x="350" y="148" font-size="7.5" fill="#c8620a" text-anchor="middle">predicting the added noise</text>
+      <text x="350" y="163" font-size="7.5" fill="#c8620a" text-anchor="middle">= predicting the score!</text>
+      <!-- arrow -->
+      <line x1="442" y1="100" x2="490" y2="100" stroke="#8a8070" stroke-width="2" marker-end="url(#gA)"/>
+      <text x="466" y="90" font-size="7" fill="#197a6b" text-anchor="middle">−ε̂ =</text>
+      <!-- Box 3 -->
+      <rect x="502" y="18" width="180" height="165" fill="#eef8f3" stroke="#b0d8c0" stroke-width="1" rx="4"/>
+      <text x="592" y="12" font-size="8" fill="#197a6b" text-anchor="middle" letter-spacing="1">= THE SCORE  ∇log p</text>
+      <circle cx="592" cy="80" r="30" fill="#197a6b" opacity=".14" stroke="#197a6b" stroke-width="1.5"/>
+      <text x="592" y="88" font-size="24" text-anchor="middle">🧭</text>
+      <text x="592" y="122" font-size="7.5" fill="#197a6b" text-anchor="middle">direction back to</text>
+      <text x="592" y="136" font-size="7.5" fill="#197a6b" text-anchor="middle">Cat Island</text>
+      <text x="592" y="155" font-size="7"   fill="#197a6b" text-anchor="middle" opacity=".8">negative noise = gradient</text>
+      <text x="592" y="168" font-size="7"   fill="#197a6b" text-anchor="middle" opacity=".8">they are the same thing!</text>
     </svg>
   </div>
 </div>
 </div>
 
-<!-- VIZ 7: Curse of Flatness / Forward process -->
+<!-- FIG 8: Curse of Flatness -->
 <div class="reveal">
 <div class="vis">
   <div class="vis-header">
     <div class="vis-header-dot"></div><div class="vis-header-dot"></div><div class="vis-header-dot"></div>
-    <span class="vis-title">Figure 7 — The "Curse of Flatness": Why the Forward Process Creates a Gradient Trail</span>
+    <span class="vis-title">Figure 8 — The "Curse of Flatness": Why the Forward Process Creates a Gradient Trail</span>
   </div>
   <div class="vis-body">
     <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
       <defs>
-        <marker id="rightA" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8" fill="#8a8070"/>
-        </marker>
+        <marker id="rightGray" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#8a8070"/></marker>
+        <marker id="rightBlue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#1d5fa8"/></marker>
       </defs>
-
-      <!-- LEFT: Sharp peak — undetectable from distance -->
-      <text x="155" y="18" font-size="8" fill="#b83030" text-anchor="middle" letter-spacing="1">PROBLEM: SHARP PEAK</text>
-      <text x="155" y="30" font-size="7"  fill="#8a8070" text-anchor="middle">Hiker can't detect the slope from far away</text>
-
-      <!-- Baseline -->
-      <line x1="30" y1="165" x2="285" y2="165" stroke="#d6cfc2" stroke-width="1.5"/>
-      <!-- Flat line left -->
-      <line x1="30"  y1="163" x2="138" y2="163" stroke="#3d3628" stroke-width="2.5"/>
-      <!-- Sharp spike up and back -->
-      <line x1="138" y1="163" x2="155" y2="62"  stroke="#3d3628" stroke-width="2.5"/>
-      <line x1="155" y1="62"  x2="172" y2="163" stroke="#3d3628" stroke-width="2.5"/>
-      <!-- Flat line right -->
-      <line x1="172" y1="163" x2="285" y2="163" stroke="#3d3628" stroke-width="2.5"/>
-
+      <!-- LEFT: Sharp peak -->
+      <text x="152" y="16" font-size="9" fill="#b83030" text-anchor="middle" letter-spacing="1">PROBLEM: SHARP PEAK</text>
+      <text x="152" y="28" font-size="7"  fill="#8a8070" text-anchor="middle">Hiker feels zero gradient from afar</text>
+      <line x1="30" y1="162" x2="282" y2="162" stroke="#d6cfc2" stroke-width="1.5"/>
+      <!-- spike -->
+      <polyline points="30,160 136,160 152,58 168,160 282,160" fill="none" stroke="#3d3628" stroke-width="2.5"/>
       <!-- Cat at peak -->
-      <circle cx="155" cy="56" r="18" fill="#197a6b" opacity=".2"/>
-      <text x="155" y="64" font-size="18" text-anchor="middle">🐱</text>
+      <circle cx="152" cy="52" r="16" fill="#197a6b" opacity=".18"/>
+      <text x="152" y="60" font-size="16" text-anchor="middle">🐱</text>
+      <!-- Hiker confused -->
+      <circle cx="62" cy="156" r="7" fill="#c8620a" stroke="#faf7f2" stroke-width="1.2"/>
+      <text x="62" y="176" font-size="7" fill="#8a8070" text-anchor="middle">hiker</text>
+      <text x="62" y="188" font-size="6.5" fill="#b83030" text-anchor="middle">zero slope!</text>
+      <text x="62" y="200" font-size="6.5" fill="#b83030" text-anchor="middle">compass dead</text>
+      <line x1="76" y1="153" x2="126" y2="153" stroke="#b83030" stroke-width="1.2" stroke-dasharray="3,3"/>
+      <text x="100" y="146" font-size="6.5" fill="#b83030" text-anchor="middle">∇p ≈ 0</text>
 
-      <!-- Hiker far left, confused -->
-      <circle cx="60"  cy="158" r="7" fill="#c8620a" stroke="#faf7f2" stroke-width="1.2"/>
-      <text x="60"  cy="175" font-size="20" text-anchor="middle" y="175">?</text>
-      <text x="60"  y="188" font-size="7"   fill="#8a8070" text-anchor="middle">hiker</text>
-      <text x="60"  y="198" font-size="6.5" fill="#b83030" text-anchor="middle">no slope felt!</text>
+      <!-- Center arrow -->
+      <line x1="312" y1="108" x2="372" y2="108" stroke="#8a8070" stroke-width="2.5" marker-end="url(#rightGray)"/>
+      <text x="342" y="97"  font-size="7.5" fill="#8a8070" text-anchor="middle">Forward</text>
+      <text x="342" y="108" font-size="7.5" fill="#c8620a" text-anchor="middle">+ Noise</text>
+      <text x="342" y="120" font-size="7.5" fill="#8a8070" text-anchor="middle">Process</text>
 
-      <!-- Arrow pointing at flatness -->
-      <line x1="80" y1="155" x2="128" y2="155" stroke="#b83030" stroke-width="1.2" stroke-dasharray="3,3"/>
-      <text x="100" y="148" font-size="6.5" fill="#b83030" text-anchor="middle">zero gradient</text>
-
-      <!-- Big center arrow -->
-      <line x1="316" y1="110" x2="378" y2="110" stroke="#8a8070" stroke-width="2.5" marker-end="url(#rightA)"/>
-      <text x="347" y="99"  font-size="7.5" fill="#8a8070" text-anchor="middle">Forward</text>
-      <text x="347" y="110" font-size="7.5" fill="#c8620a" text-anchor="middle">+ Noise</text>
-      <text x="347" y="121" font-size="7.5" fill="#8a8070" text-anchor="middle">Process</text>
-
-      <!-- RIGHT: Blurred peak — gradient trail -->
-      <text x="545" y="18" font-size="8" fill="#197a6b" text-anchor="middle" letter-spacing="1">SOLUTION: BLURRED PEAK</text>
-      <text x="545" y="30" font-size="7"  fill="#8a8070" text-anchor="middle">Gentle slope extends across the desert</text>
-
-      <!-- Baseline -->
-      <line x1="415" y1="165" x2="670" y2="165" stroke="#d6cfc2" stroke-width="1.5"/>
-      <!-- Smooth wide Gaussian shape -->
-      <path d="M415,163 Q450,160 490,145 Q520,120 545,72 Q570,120 600,145 Q640,160 670,163"
-            fill="#197a6b" fill-opacity=".1" stroke="#197a6b" stroke-width="2.5"/>
-
-      <!-- Cat at blurred peak (slightly transparent) -->
-      <circle cx="545" cy="66" r="18" fill="#197a6b" opacity=".15"/>
-      <text x="545" y="74" font-size="18" text-anchor="middle" opacity=".7">🐱</text>
-
-      <!-- Hiker far left, getting gradient -->
-      <circle cx="450" cy="155" r="7" fill="#c8620a" stroke="#faf7f2" stroke-width="1.2"/>
-      <text x="450" y="188" font-size="7"   fill="#8a8070" text-anchor="middle">hiker</text>
-      <text x="450" y="198" font-size="6.5" fill="#197a6b" text-anchor="middle">feels slope!</text>
-
+      <!-- RIGHT: Blurred peak -->
+      <text x="543" y="16" font-size="9" fill="#197a6b" text-anchor="middle" letter-spacing="1">SOLUTION: BLURRED PEAK</text>
+      <text x="543" y="28" font-size="7"  fill="#8a8070" text-anchor="middle">Slope felt from miles away!</text>
+      <line x1="412" y1="162" x2="672" y2="162" stroke="#d6cfc2" stroke-width="1.5"/>
+      <!-- Smooth Gaussian shape -->
+      <path d="M415,160 Q450,158 490,145 Q520,122 543,70 Q566,122 596,145 Q636,158 670,160" fill="#197a6b" fill-opacity=".08" stroke="#197a6b" stroke-width="2.5"/>
+      <!-- Cat blurred -->
+      <circle cx="543" cy="64" r="16" fill="#197a6b" opacity=".14"/>
+      <text x="543" y="72" font-size="16" text-anchor="middle" opacity=".7">🐱</text>
+      <!-- Hiker feeling slope -->
+      <circle cx="448" cy="153" r="7" fill="#c8620a" stroke="#faf7f2" stroke-width="1.2"/>
+      <text x="448" y="173" font-size="7" fill="#8a8070" text-anchor="middle">hiker</text>
+      <text x="448" y="185" font-size="6.5" fill="#197a6b" text-anchor="middle">feels slope!</text>
+      <text x="448" y="197" font-size="6.5" fill="#197a6b" text-anchor="middle">gradient trail!</text>
       <!-- Gradient arrows along slope -->
-      <line x1="460" y1="150" x2="485" y2="138" stroke="#1d5fa8" stroke-width="1.5" marker-end="url(#rightA)"/>
-      <line x1="490" y1="143" x2="512" y2="126" stroke="#1d5fa8" stroke-width="1.5" marker-end="url(#rightA)"/>
-      <line x1="518" y1="118" x2="534" y2="100" stroke="#1d5fa8" stroke-width="1.5" marker-end="url(#rightA)"/>
-      <text x="460" y="130" font-size="6.5" fill="#1d5fa8" opacity=".8">∇log p</text>
+      <line x1="460" y1="148" x2="482" y2="136" stroke="#1d5fa8" stroke-width="1.5" marker-end="url(#rightBlue)"/>
+      <line x1="490" y1="143" x2="510" y2="127" stroke="#1d5fa8" stroke-width="1.5" marker-end="url(#rightBlue)"/>
+      <line x1="516" y1="118" x2="532" y2="100" stroke="#1d5fa8" stroke-width="1.5" marker-end="url(#rightBlue)"/>
+      <text x="462" y="128" font-size="6.5" fill="#1d5fa8" opacity=".8">∇log p</text>
     </svg>
   </div>
 </div>
 </div>
 
+<!-- ─── INTERACTIVE PLAYGROUND ───────────────────── -->
 <div class="reveal">
-<div class="section-break"><span>what's next</span></div>
+<div class="section-break"><span>try it yourself</span></div>
+</div>
 
-<h3>Coming Up: Score Matching</h3>
-<p>We now understand the Reverse Process — the guided walk home. But to make that walk, we need a compass that works at <em>every</em> level of fog and every distance from the island.</p>
-<p>In the next part, we will dive into <strong>Score Matching</strong>. We will see how the Forward Process acts as a teacher, building a multi-scale compass that allows our hiker to find their way home, no matter how lost they are in the noise.</p>
+<div class="reveal">
+<div class="vis" id="playground-vis">
+  <div class="vis-header">
+    <div class="vis-header-dot"></div><div class="vis-header-dot"></div><div class="vis-header-dot"></div>
+    <span class="vis-title">Playground — Experience Langevin Sampling in 1D</span>
+  </div>
+  <div class="vis-body" style="padding:0">
+    <div id="langevin-app"></div>
+  </div>
+</div>
 </div>
 
 </article>
 
 <script>
-// Scroll-triggered reveal
+/* ── Scroll reveal ───────────────────────────────── */
 const obs = new IntersectionObserver(
-  entries => entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } }),
-  { threshold: 0.08 }
+  entries => entries.forEach(e => {
+    if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }
+  }),
+  { threshold: 0.07 }
 );
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+/* ══════════════════════════════════════════════════
+   LANGEVIN SAMPLING PLAYGROUND — SIMPLE VERSION
+   ══════════════════════════════════════════════════ */
+(function(){
+
+const C = {
+  bg:      '#f2ede4',
+  surface: '#faf7f2',
+  ink:     '#0d1117',
+  rule:    '#d6cfc2',
+  muted:   '#8a8070',
+  amber:   '#c8620a',
+  blue:    '#1d5fa8',
+  teal:    '#197a6b',
+  red:     '#b83030',
+  green:   '#197a6b',
+  label:   '#3d3628',
+};
+
+/* ══════════════════════════════════════════════════
+   DISTRIBUTIONS
+   Each one is designed to stress-test a specific
+   concept from the article.
+   ══════════════════════════════════════════════════ */
+
+/* shared helpers */
+function gaussMix(peaks, x){
+  // peaks: [{m, s, w}]
+  return peaks.reduce((s,{m,si,w})=> s + w*Math.exp(-0.5*((x-m)/si)**2)/si, 0);
+}
+function gaussMixScore(peaks, x){
+  const mix = gaussMix(peaks,x)+1e-300;
+  const grad = peaks.reduce((s,{m,si,w})=> s + w*Math.exp(-0.5*((x-m)/si)**2)/si*(-(x-m)/si**2), 0);
+  return grad/mix;  // ∇ log p
+}
+function gaussMixRawScore(peaks, x){
+  return peaks.reduce((s,{m,si,w})=> s + w*Math.exp(-0.5*((x-m)/si)**2)/si*(-(x-m)/si**2), 0);
+}
+
+const DISTS = {
+
+  /* 1. CURRENT: two big peaks + tiny middle bump
+        Best for: baseline, showing noise on/off,
+        steps-per-sample effect. Gradients are
+        usable even without log — good starting point. */
+  'Two Peaks + Hidden Bump': {
+    tag: 'Baseline',
+    why: 'Two strong peaks with a small hidden bump between them. A good starting landscape — try all the controls here first.',
+    peaks: [
+      {m:-2.2, si:0.75, w:0.55},
+      {m: 2.0, si:0.90, w:0.35},
+      {m: 0.0, si:0.50, w:0.10},
+    ],
+  },
+
+  /* 2. FAR-APART peaks — raw gradient dies in the gap.
+        The walker using ∇p gets stuck; ∇ log p crosses.
+        Best for: showing WHY the log matters. */
+  'Far-Apart Peaks': {
+    tag: 'Shows log vs raw',
+    why: 'Peaks are far apart — the raw gradient (∇p) nearly vanishes in the gap, so the walker gets trapped. Switch to ∇ log p to see it cross freely.',
+    peaks: [
+      {m:-4.0, si:0.55, w:0.60},
+      {m: 4.0, si:0.55, w:0.40},
+    ],
+  },
+
+  /* 3. ONE DOMINANT + one tiny — raw gradient ignores
+        the small peak entirely. Log grad still finds it. */
+  'Dominant + Tiny Peak': {
+    tag: 'Shows log vs raw',
+    why: 'One massive peak, one tiny one. Raw gradient is almost entirely pulled toward the big peak and ignores the small one. Log grad treats both fairly.',
+    peaks: [
+      {m:-1.5, si:0.60, w:0.90},
+      {m: 3.5, si:0.50, w:0.10},
+    ],
+  },
+
+  /* 4. FOUR PEAKS — tests noise on/off clearly.
+        Without noise the walker locks to one peak and
+        never escapes. With noise it visits all four. */
+  'Four Peaks': {
+    tag: 'Shows noise on/off',
+    why: 'Four peaks spread across the space. Turn noise OFF — the walker locks to one peak forever. Turn it ON — it escapes and visits all four.',
+    peaks: [
+      {m:-4.0, si:0.45, w:0.30},
+      {m:-1.5, si:0.55, w:0.25},
+      {m: 1.5, si:0.50, w:0.25},
+      {m: 3.8, si:0.45, w:0.20},
+    ],
+  },
+
+  /* 5. VERY NARROW peak — stress-tests steps-per-sample.
+        Too few steps and you only ever sample the flanks.
+        More steps needed to capture the sharp spike. */
+  'Sharp Spike + Plateau': {
+    tag: 'Shows steps effect',
+    why: 'One very narrow spike and one wide shallow plateau. With few steps the walker barely explores. Crank up steps-per-sample to see the spike properly captured.',
+    peaks: [
+      {m: 0.0, si:0.20, w:0.65},
+      {m: 3.0, si:1.80, w:0.35},
+    ],
+  },
+
+};
+
+const XA = -5.5, XB = 5.5;
+
+/* active distribution — starts on baseline */
+let activeDist = DISTS['Two Peaks + Hidden Bump'];
+
+function logp(x){
+  return Math.log(gaussMix(activeDist.peaks, x) + 1e-300);
+}
+function scoreLogP(x){
+  return gaussMixScore(activeDist.peaks, x);
+}
+function scoreRawP(x){
+  return gaussMixRawScore(activeDist.peaks, x);
+}
+
+/* pre-compute curve whenever distribution changes */
+let CURVE = null, YMIN = 0, YMAX = 0;
+function recomputeCurve(){
+  const N=280, xs=[], ys=[];
+  for(let i=0;i<N;i++){
+    const x=XA+i/(N-1)*(XB-XA);
+    xs.push(x); ys.push(logp(x));
+  }
+  const valid=ys.filter(isFinite);
+  YMIN=Math.min(...valid)-0.4;
+  YMAX=Math.max(...valid)+1.0;
+  CURVE={xs,ys};
+}
+recomputeCurve();
+
+/* ── Settings ────────────────────────────────────── */
+const TOTAL_SAMPLES = 500;  // always collect exactly this many
+let stepsPerSample  = 20;   // "walk steps between drops"
+let useLogGrad      = true; // true = ∇ log p,  false = ∇ p
+let addNoise        = true; // jiggle on/off
+const ETA           = 0.04; // fixed step size (simple)
+
+/* ── State ───────────────────────────────────────── */
+let samples      = [];   // collected sample positions
+let walkerX      = XA + Math.random()*(XB-XA);
+let walkerTrail  = [];
+let stepsDone    = 0;    // steps since last sample collected
+let animRunning  = false;
+let rafId        = null;
+
+/* ── DOM ─────────────────────────────────────────── */
+const root = document.getElementById('langevin-app');
+root.innerHTML = `
+<style>
+#lv-wrap{background:${C.bg};font-family:'JetBrains Mono',monospace}
+
+/* ── dist selector bar ── */
+#lv-dist-bar{
+  padding:14px 22px 12px;
+  background:${C.ink};
+  border-bottom:1px solid #2a3450;
+}
+#lv-dist-bar-label{
+  font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  color:#5a6470;margin-bottom:10px;display:block;
+}
+#lv-dist-pills{display:flex;flex-wrap:wrap;gap:6px}
+.lv-dist-pill{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:.06em;padding:5px 12px;
+  border:1.5px solid #2a3450;border-radius:2px;
+  background:transparent;color:#7a8898;cursor:pointer;
+  transition:all .15s;line-height:1.2;text-align:left;
+}
+.lv-dist-pill:hover{border-color:${C.amber};color:${C.amber}}
+.lv-dist-pill.active{border-color:${C.amber};background:${C.amber};color:#fff}
+.lv-dist-pill .pill-tag{
+  display:block;font-size:7.5px;letter-spacing:.1em;
+  text-transform:uppercase;opacity:.75;margin-bottom:2px;
+}
+.lv-dist-pill.active .pill-tag{opacity:.85}
+
+/* ── why-box ── */
+#lv-why{
+  padding:11px 22px;
+  background:#141920;
+  border-bottom:1px solid #2a3450;
+  font-size:9.5px;line-height:1.6;letter-spacing:.03em;
+  color:#7a8898;
+}
+#lv-why em{color:${C.amber};font-style:normal}
+
+/* ── canvas ── */
+#lv-canvas{display:block;width:100%;cursor:default}
+
+/* ── controls ── */
+#lv-controls{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  border-top:1px solid ${C.rule};
+}
+@media(max-width:520px){#lv-controls{grid-template-columns:1fr}}
+
+.lv-ctrl-group{
+  padding:16px 22px;
+  border-right:1px solid ${C.rule};
+  border-bottom:1px solid ${C.rule};
+}
+.lv-ctrl-group:nth-child(even){border-right:none}
+.lv-ctrl-group:nth-last-child(-n+2){border-bottom:none}
+@media(max-width:520px){
+  .lv-ctrl-group{border-right:none}
+  .lv-ctrl-group:nth-last-child(-n+2){border-bottom:1px solid ${C.rule}}
+  .lv-ctrl-group:last-child{border-bottom:none}
+}
+
+.lv-ctrl-label{
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:${C.muted};margin-bottom:6px;display:block;
+}
+.lv-ctrl-hint{
+  font-size:9px;color:${C.muted};margin-top:5px;line-height:1.5;
+  letter-spacing:.02em;
+}
+.lv-ctrl-hint em{color:${C.amber};font-style:normal}
+
+/* slider */
+.lv-slider{
+  -webkit-appearance:none;width:100%;height:3px;
+  background:${C.rule};border-radius:2px;outline:none;
+  accent-color:${C.amber};
+}
+.lv-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:${C.amber};cursor:pointer;border:2px solid ${C.surface};
+}
+
+/* toggle pills */
+.lv-toggle{display:flex;gap:0;border:1.5px solid ${C.rule};border-radius:3px;overflow:hidden;width:fit-content}
+.lv-tog-btn{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;
+  padding:6px 14px;background:transparent;color:${C.muted};
+  border:none;cursor:pointer;transition:all .15s;
+}
+.lv-tog-btn.on{background:${C.amber};color:#fff}
+
+/* run button */
+#lv-run-wrap{
+  grid-column:1/-1;
+  padding:16px 22px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  border-top:1px solid ${C.rule};
+  background:${C.surface};
+}
+#lv-run-btn{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;
+  padding:9px 24px;background:${C.ink};color:#faf7f2;
+  border:none;border-radius:2px;cursor:pointer;transition:background .15s;
+}
+#lv-run-btn:hover{background:#2a3450}
+#lv-run-btn.running{background:${C.amber}}
+#lv-progress-wrap{flex:1;min-width:120px}
+#lv-progress-bar-bg{height:3px;background:${C.rule};border-radius:2px;overflow:hidden}
+#lv-progress-bar{height:3px;background:${C.amber};width:0%;transition:width .1s;border-radius:2px}
+#lv-progress-label{font-size:9px;color:${C.muted};margin-top:5px;letter-spacing:.06em}
+#lv-reset-btn{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:9px 16px;background:transparent;color:${C.muted};
+  border:1.5px solid ${C.rule};border-radius:2px;cursor:pointer;
+}
+#lv-reset-btn:hover{border-color:${C.amber};color:${C.amber}}
+</style>
+
+<div id="lv-wrap">
+
+  <!-- distribution picker -->
+  <div id="lv-dist-bar">
+    <span id="lv-dist-bar-label">Choose a landscape to explore</span>
+    <div id="lv-dist-pills"></div>
+  </div>
+
+  <!-- why this distribution -->
+  <div id="lv-why"></div>
+
+  <canvas id="lv-canvas" height="320"></canvas>
+
+  <div id="lv-controls">
+
+    <div class="lv-ctrl-group">
+      <span class="lv-ctrl-label">Steps between each sample</span>
+      <input type="range" class="lv-slider" id="lv-sps" min="1" max="80" step="1" value="20">
+      <div class="lv-ctrl-hint">
+        <em id="lv-sps-val">20 steps</em> — fewer steps = samples are more bunched together.
+        More steps = walker explores further before each sample is collected.
+      </div>
+    </div>
+
+    <div class="lv-ctrl-group">
+      <span class="lv-ctrl-label">Gradient type</span>
+      <div class="lv-toggle" id="lv-grad-tog">
+        <button class="lv-tog-btn on" data-v="log">∇ log p  (score)</button>
+        <button class="lv-tog-btn" data-v="raw">∇ p  (raw)</button>
+      </div>
+      <div class="lv-ctrl-hint" id="lv-grad-hint">
+        <em>∇ log p</em> — the score. Stays strong even far from peaks.
+      </div>
+    </div>
+
+    <div class="lv-ctrl-group">
+      <span class="lv-ctrl-label">Random jiggle (noise)</span>
+      <div class="lv-toggle" id="lv-noise-tog">
+        <button class="lv-tog-btn on" data-v="on">On</button>
+        <button class="lv-tog-btn" data-v="off">Off</button>
+      </div>
+      <div class="lv-ctrl-hint" id="lv-noise-hint">
+        <em>On</em> — walker explores the whole landscape. Turn off to see it collapse to one peak.
+      </div>
+    </div>
+
+    <div class="lv-ctrl-group">
+      <span class="lv-ctrl-label">What you're seeing</span>
+      <div class="lv-ctrl-hint" style="margin-top:2px;line-height:1.7">
+        <span style="color:${C.blue};font-size:11px">▬</span> <strong style="color:${C.label}">The unknown distribution</strong> — this is the shape we want to sample from, but in real life we don't have a formula for it. We only have the score (its gradient).<br><br>
+        <span style="color:#8ab890;font-size:11px">█</span> <strong style="color:${C.label}">Langevin samples</strong> — collected by the walker. Watch how, without ever knowing the distribution directly, these green bars slowly grow to <em>mirror the blue curve's shape</em>.<br><br>
+        <span style="color:${C.amber};font-size:11px">●</span> <strong style="color:${C.label}">The walker</strong> — one point wandering the landscape. The <span style="color:${C.red}">red arrow</span> is the drift force pushing it uphill toward higher probability.
+      </div>
+    </div>
+
+    <div id="lv-run-wrap">
+      <button id="lv-run-btn">▶ Run</button>
+      <button id="lv-reset-btn">↺ Reset</button>
+      <div id="lv-progress-wrap">
+        <div id="lv-progress-bar-bg"><div id="lv-progress-bar"></div></div>
+        <div id="lv-progress-label">0 / ${TOTAL_SAMPLES} samples</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+`;
+
+/* ── Canvas setup ────────────────────────────────── */
+const canvas = document.getElementById('lv-canvas');
+const ctx    = canvas.getContext('2d');
+const DPR    = window.devicePixelRatio || 1;
+
+function resize(){
+  const w = canvas.parentElement.clientWidth;
+  canvas.width  = w * DPR;
+  canvas.height = 320 * DPR;
+  canvas.style.width  = w + 'px';
+  canvas.style.height = '320px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  draw();
+}
+window.addEventListener('resize', resize);
+
+/* ── Coordinate helpers ──────────────────────────── */
+const PAD = {t:28, b:44, l:48, r:16};
+function W(){ return canvas.width/DPR }
+function H(){ return canvas.height/DPR }
+function x2p(x){ return PAD.l + (x-XA)/(XB-XA)*(W()-PAD.l-PAD.r) }
+function y2p(y,lo,hi){ return PAD.t + (1-(y-lo)/(hi-lo))*(H()-PAD.t-PAD.b) }
+
+/* ── Draw ────────────────────────────────────────── */
+function draw(){
+  const w=W(), h=H();
+  ctx.clearRect(0,0,w,h);
+
+  /* background */
+  ctx.fillStyle=C.bg; ctx.fillRect(0,0,w,h);
+
+  /* ─ histogram of collected samples ─ */
+  if(samples.length > 5){
+    const BINS=50;
+    const bins=new Float32Array(BINS);
+    samples.forEach(s=>{
+      const b=Math.floor((s-XA)/(XB-XA)*BINS);
+      if(b>=0&&b<BINS) bins[b]++;
+    });
+    const maxB=Math.max(...bins,1);
+    const bW=(w-PAD.l-PAD.r)/BINS;
+    const plotH=h-PAD.t-PAD.b;
+    ctx.fillStyle='#8ab890';
+    ctx.globalAlpha=0.55;
+    bins.forEach((b,i)=>{
+      if(!b) return;
+      const ph=(b/maxB)*plotH*0.82;
+      ctx.fillRect(PAD.l+i*bW, PAD.t+plotH-ph, Math.max(bW-1,1), ph);
+    });
+    ctx.globalAlpha=1;
+  }
+
+  /* ─ grid ─ */
+  ctx.strokeStyle=C.rule; ctx.lineWidth=0.7; ctx.setLineDash([2,5]);
+  for(let x=Math.ceil(XA);x<=Math.floor(XB);x++){
+    ctx.beginPath(); ctx.moveTo(x2p(x),PAD.t); ctx.lineTo(x2p(x),h-PAD.b); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  /* ─ axes ─ */
+  ctx.strokeStyle=C.rule; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(PAD.l,PAD.t); ctx.lineTo(PAD.l,h-PAD.b); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD.l,h-PAD.b); ctx.lineTo(w-PAD.r,h-PAD.b); ctx.stroke();
+
+  /* ─ x axis labels ─ */
+  ctx.fillStyle=C.muted; ctx.font=`9px 'JetBrains Mono',monospace`; ctx.textAlign='center';
+  for(let x=Math.ceil(XA);x<=Math.floor(XB);x++){
+    ctx.fillText(x, x2p(x), h-PAD.b+14);
+  }
+  ctx.fillStyle=C.muted; ctx.textAlign='left';
+  ctx.fillText('x', w-PAD.r+4, h-PAD.b+4);
+
+  /* ─ y axis label ─ */
+  ctx.save(); ctx.translate(13,h/2); ctx.rotate(-Math.PI/2);
+  ctx.font=`9px 'JetBrains Mono',monospace`; ctx.fillStyle=C.muted; ctx.textAlign='center';
+  ctx.fillText('log p(x)', 0, 0); ctx.restore();
+
+  /* ─ log-p curve ─ */
+  ctx.strokeStyle=C.blue; ctx.lineWidth=2.5; ctx.lineJoin='round';
+  ctx.beginPath();
+  CURVE.xs.forEach((x,i)=>{
+    const py=y2p(CURVE.ys[i],YMIN,YMAX);
+    i===0 ? ctx.moveTo(x2p(x),py) : ctx.lineTo(x2p(x),py);
+  });
+  ctx.stroke();
+
+  /* ─ walker trail ─ */
+  if(walkerTrail.length>1){
+    ctx.strokeStyle=C.muted; ctx.lineWidth=1.2; ctx.globalAlpha=0.45;
+    ctx.beginPath();
+    walkerTrail.forEach((tx,i)=>{
+      const px=x2p(tx), py=y2p(logp(tx),YMIN,YMAX);
+      i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+    });
+    ctx.stroke(); ctx.globalAlpha=1;
+  }
+
+  /* ─ walker dot ─ */
+  const wx=x2p(walkerX), wy=y2p(logp(walkerX),YMIN,YMAX);
+
+  /* drift arrow */
+  const scoreVal = useLogGrad ? scoreLogP(walkerX) : scoreRawP(walkerX);
+  const maxArrow = 60;
+  /* for raw p, normalise so it's visible */
+  let arrowScale = useLogGrad ? 18 : 18/(Math.abs(scoreRawP(0))||1)*Math.abs(scoreLogP(0));
+  const arrowDX  = Math.max(-maxArrow, Math.min(maxArrow, scoreVal*arrowScale));
+  ctx.strokeStyle='#b83030'; ctx.lineWidth=2; ctx.fillStyle='#b83030';
+  ctx.beginPath(); ctx.moveTo(wx,wy); ctx.lineTo(wx+arrowDX,wy); ctx.stroke();
+  if(Math.abs(arrowDX)>4){
+    const d=Math.sign(arrowDX);
+    ctx.beginPath(); ctx.moveTo(wx+arrowDX,wy);
+    ctx.lineTo(wx+arrowDX-d*7,wy-4); ctx.lineTo(wx+arrowDX-d*7,wy+4);
+    ctx.closePath(); ctx.fill();
+  }
+
+  /* walker circle */
+  ctx.beginPath(); ctx.arc(wx,wy,7,0,Math.PI*2);
+  ctx.fillStyle=C.amber; ctx.fill();
+  ctx.strokeStyle=C.surface; ctx.lineWidth=2; ctx.stroke();
+
+  /* ─ floating curve label ─ */
+  // find the x near the rightmost peak to anchor the label
+  ctx.font=`8.5px 'JetBrains Mono',monospace`; ctx.textAlign='left';
+  ctx.fillStyle=C.blue;
+  ctx.fillText('unknown distribution  p(x)', PAD.l+6, PAD.t+14);
+
+  /* ─ floating sample label (only once enough bars exist) ─ */
+  if(samples.length > 30){
+    ctx.fillStyle='#4a8f60';
+    ctx.fillText('langevin samples', PAD.l+6, PAD.t+28);
+  }
+
+  /* ─ completion message on canvas ─ */
+  if(samples.length >= TOTAL_SAMPLES){
+    const bw=w-PAD.l-PAD.r, bh=36;
+    const bx=PAD.l, by=PAD.t+6;
+    ctx.fillStyle='rgba(25,122,107,0.10)';
+    ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,4); ctx.fill();
+    ctx.strokeStyle='rgba(25,122,107,0.35)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,4); ctx.stroke();
+    ctx.fillStyle=C.teal; ctx.font=`bold 9.5px 'JetBrains Mono',monospace`;
+    ctx.textAlign='center';
+    ctx.fillText('The green bars now mirror the shape of the blue curve —', w/2, by+15);
+    ctx.fillText('sampled using only the score, never the distribution directly.', w/2, by+28);
+  }
+
+  /* ─ step counter top-right ─ */
+  ctx.fillStyle=C.muted; ctx.font=`9px 'JetBrains Mono',monospace`; ctx.textAlign='right';
+  const gradLabel = useLogGrad ? '∇ log p' : '∇ p (raw)';
+  const noiseLabel = addNoise ? '+ noise' : 'no noise';
+  ctx.fillText(`${gradLabel}  ·  ${noiseLabel}`, w-PAD.r, PAD.t-8);
+}
+
+/* ── Gaussian random ─────────────────────────────── */
+function randn(){
+  const u=Math.random()||1e-10;
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*Math.random());
+}
+
+/* ── One Langevin micro-step ─────────────────────── */
+function step(){
+  const g = useLogGrad ? scoreLogP(walkerX) : scoreRawP(walkerX);
+  /* for raw p: gradient is tiny, so we normalise it to comparable magnitude */
+  const gScaled = useLogGrad ? g : g / (Math.abs(scoreRawP(0)) + 1e-12) * Math.abs(scoreLogP(0));
+  const noise   = addNoise ? Math.sqrt(2*ETA)*randn() : 0;
+  walkerX += ETA*gScaled + noise;
+  walkerX = Math.max(XA+0.01, Math.min(XB-0.01, walkerX));
+  walkerTrail.push(walkerX);
+  if(walkerTrail.length>40) walkerTrail.shift();
+  stepsDone++;
+}
+
+/* ── Animation ───────────────────────────────────── */
+const STEPS_PER_FRAME = 3;  // micro-steps per rAF tick (keeps animation smooth)
+
+function loop(){
+  if(!animRunning){ rafId=null; return; }
+
+  for(let i=0;i<STEPS_PER_FRAME;i++){
+    step();
+    if(stepsDone >= stepsPerSample){
+      samples.push(walkerX);
+      stepsDone=0;
+      updateProgress();
+      if(samples.length >= TOTAL_SAMPLES){ finish(); return; }
+    }
+  }
+
+  draw();
+  rafId=requestAnimationFrame(loop);
+}
+
+function finish(){
+  animRunning=false;
+  draw();
+  document.getElementById('lv-run-btn').textContent='▶ Run again';
+  document.getElementById('lv-run-btn').classList.remove('running');
+  document.getElementById('lv-progress-label').innerHTML=
+    `<span style="color:#197a6b">✓ ${TOTAL_SAMPLES} samples collected — the green bars now mirror the blue curve.</span>`;
+}
+
+function updateProgress(){
+  const pct=(samples.length/TOTAL_SAMPLES*100).toFixed(0);
+  document.getElementById('lv-progress-bar').style.width=pct+'%';
+  const remaining = TOTAL_SAMPLES - samples.length;
+  document.getElementById('lv-progress-label').textContent=
+    `${samples.length} of ${TOTAL_SAMPLES} samples — ${remaining} more to go`;
+}
+
+/* ── Reset ───────────────────────────────────────── */
+function reset(){
+  animRunning=false;
+  if(rafId){ cancelAnimationFrame(rafId); rafId=null; }
+  samples=[]; walkerTrail=[]; stepsDone=0;
+  walkerX=XA+Math.random()*(XB-XA);
+  document.getElementById('lv-run-btn').textContent='▶ Run';
+  document.getElementById('lv-run-btn').classList.remove('running');
+  document.getElementById('lv-progress-bar').style.width='0%';
+  document.getElementById('lv-progress-label').textContent=`0 / ${TOTAL_SAMPLES} samples`;
+  draw();
+}
+
+/* ── Controls ────────────────────────────────────── */
+
+/* distribution pills */
+function setWhy(d){
+  document.getElementById('lv-why').innerHTML =
+    `<em>${d.tag}:</em> ${d.why}`;
+}
+
+const pillContainer = document.getElementById('lv-dist-pills');
+Object.entries(DISTS).forEach(([name, d], i)=>{
+  const btn = document.createElement('button');
+  btn.className = 'lv-dist-pill' + (i===0 ? ' active' : '');
+  btn.innerHTML = `<span class="pill-tag">${d.tag}</span>${name}`;
+  btn.addEventListener('click',()=>{
+    if(animRunning){ animRunning=false; cancelAnimationFrame(rafId); rafId=null; }
+    activeDist = d;
+    recomputeCurve();
+    document.querySelectorAll('.lv-dist-pill').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    setWhy(d);
+    reset();
+  });
+  pillContainer.appendChild(btn);
+});
+setWhy(Object.values(DISTS)[0]);
+
+/* steps-per-sample slider */
+const spsSlider = document.getElementById('lv-sps');
+const spsVal    = document.getElementById('lv-sps-val');
+spsSlider.addEventListener('input',()=>{
+  stepsPerSample=parseInt(spsSlider.value);
+  spsVal.textContent=stepsPerSample+' steps';
+});
+
+/* gradient toggle */
+document.getElementById('lv-grad-tog').addEventListener('click', e=>{
+  const btn=e.target.closest('.lv-tog-btn'); if(!btn) return;
+  document.querySelectorAll('#lv-grad-tog .lv-tog-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  useLogGrad = btn.dataset.v==='log';
+  const hint=document.getElementById('lv-grad-hint');
+  hint.innerHTML = useLogGrad
+    ? `<em>∇ log p</em> — the score. Stays strong even far from peaks.`
+    : `<em>∇ p (raw)</em> — vanishes far from peaks. Walker gets stuck or wanders.`;
+  draw();
+});
+
+/* noise toggle */
+document.getElementById('lv-noise-tog').addEventListener('click', e=>{
+  const btn=e.target.closest('.lv-tog-btn'); if(!btn) return;
+  document.querySelectorAll('#lv-noise-tog .lv-tog-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  addNoise = btn.dataset.v==='on';
+  const hint=document.getElementById('lv-noise-hint');
+  hint.innerHTML = addNoise
+    ? `<em>On</em> — walker explores the whole landscape. Turn off to see it collapse to one peak.`
+    : `<em>Off</em> — no jiggle. Watch the walker collapse to a single peak and stay there.`;
+  draw();
+});
+
+/* run / pause */
+document.getElementById('lv-run-btn').addEventListener('click',()=>{
+  if(samples.length>=TOTAL_SAMPLES) reset();
+  animRunning=!animRunning;
+  const btn=document.getElementById('lv-run-btn');
+  if(animRunning){
+    btn.textContent='⏸ Pause'; btn.classList.add('running');
+    rafId=requestAnimationFrame(loop);
+  } else {
+    btn.textContent='▶ Continue'; btn.classList.remove('running');
+  }
+});
+
+/* reset */
+document.getElementById('lv-reset-btn').addEventListener('click', reset);
+
+/* ── Start ───────────────────────────────────────── */
+resize();
+
+})();
 </script>
 </body>
 </html>
